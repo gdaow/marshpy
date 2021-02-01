@@ -1,10 +1,6 @@
 """Handler loading a value only if some flag is defined."""
+from copy import copy
 from typing import Any
-from typing import Optional
-from yaml import MappingNode
-from yaml import Node
-from yaml import ScalarNode
-from yaml import SequenceNode
 
 from pofy.common import UNDEFINED
 from pofy.interfaces import IBaseField
@@ -13,9 +9,9 @@ from pofy.tag_handlers.tag_handler import TagHandler
 
 
 class IfHandler(TagHandler):
-    """Tag loading a value only if some flag is defined on loading.
+    """Tag loading a value only if some flag is defined.
 
-    See pofy.load method to set flags.
+    Flags are set through the flags parameter of the pofy.load method.
     """
 
     tag_pattern = r'^if\((?P<flag>[\w|_]*)\)$'
@@ -34,34 +30,10 @@ class IfHandler(TagHandler):
         if not context.is_defined(flag):
             return UNDEFINED
 
-        # We need to return a copy of the node to avoid infinite recursion
-        # that would happen if we return a node with an if tag defined on it
-        node_copy: Optional[Node] = None
+        # We need to return a copy of the node and erase the tag to avoid
+        # the infinite recursion that would happen if we return a node with
+        # an if tag still defined on it
+        node_copy = copy(node)
+        node_copy.tag = ''
 
-        if isinstance(node, ScalarNode):
-            node_copy = ScalarNode(
-                tag='',
-                value=node.value,
-                start_mark=node.start_mark,
-                end_mark=node.end_mark,
-                style=node.style
-            )
-        elif isinstance(node, SequenceNode):
-            node_copy = SequenceNode(
-                tag='',
-                value=node.value,
-                start_mark=node.start_mark,
-                end_mark=node.end_mark,
-                flow_style=node.flow_style
-            )
-        elif isinstance(node, MappingNode):
-            node_copy = MappingNode(
-                tag='',
-                value=node.value,
-                start_mark=node.start_mark,
-                end_mark=node.end_mark,
-                flow_style=node.flow_style
-            )
-
-        assert node_copy is not None, "Unkown node type"
         return context.load(field, node_copy)
