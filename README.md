@@ -303,6 +303,33 @@ usable out of the box :
 
 #### env
 
+The env tag can be set on a YAML string value, and will load the value of the
+environment variable named like the tagged string. If the environment variable
+isn't set, the Pofy field will not be set either, allowing to eventually
+fallback on a default value (see [first-of](#first-of-handler) for example).
+
+If this tag is set on another value than a YAML scalar value, an
+UnexpectedNodeTypeError will be raised, or the defined
+[error handler](#error-handling) will be called with
+ErrorCode.UNEXPECTED_NODE_TYPE as the error_code parameter.
+
+```python
+  from pofy import StringField, load
+
+  class Test:
+    class Schema:
+      string_field = StringField()
+
+  test = load('string_field: !env PATH', Test)
+  assert test.string_field == '/bin:/usr/bin:/usr/local/bin'
+
+  test = load('string_field: !env UNKNOWN_ENV_VAR', Test)
+  assert not hasattr(test, 'string_field')
+
+  # Will raise UnexpectedNodeTypeError
+  test = load('string_field: !env [oops]', Test) 
+
+```
 
 #### glob
 
