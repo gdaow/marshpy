@@ -33,17 +33,17 @@ improvements. Feel free to join [the Pofy channel on Matrix](https://matrix.to/#
       - [DictField](#dictfield)
       - [ObjectField](#objectfield)
     - [Tag Handlers](#tag-handlers)
-      - [env](#env-handler)
-      - [first-of](#first-of-handler)
-      - [glob](#glob-handler)
-      - [if](#if-handler)
-      - [import / try-import](#import--try-import-handler)
-      - [merge](#merge-handler)
+      - [env](#env)
+      - [first-of](#first-of)
+      - [glob](#glob)
+      - [if](#if)
+      - [import / try-import](#import--try-import)
+      - [merge](#merge)
       - [Custom Tag Handlers](#custom-tag-handlers)
     - [Hooks](#hooks)
       - [Field Validation](#field-validation)
       - [Object Validation](#object-validation)
-      - [Post Load hook](#post-load-hook)
+      - [Post Load](#post-load)
       - [Error Handling](#error-handling)
       - [Schema Resolver]#schema-resolver)
     - [Creating Custom Fields](#creating-custom-fields)
@@ -331,9 +331,15 @@ ErrorCode.UNEXPECTED_NODE_TYPE as the error_code parameter.
 
 ```
 
-#### glob
+#### first-of
+
+#### glob tag
+
+#### if
 
 #### import / try-import
+
+#### merge
 
 The import and try import tags allows to import another YAML file as a field of
 the currently deserialized object :
@@ -392,9 +398,11 @@ Before using it in YAML, the handler should be registered when calling the pofy
 
 #### Oject validation
 
-#### Post-load hook
+#### Post Load
 
-#### Error handling
+#### Error Handling
+
+#### Schema Resolver
 
 ### Creating Custom Fields
 
