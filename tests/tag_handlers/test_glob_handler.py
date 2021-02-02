@@ -1,4 +1,4 @@
-"""Glob handler tests."""
+"""Glob tag handler tests."""
 from pathlib import Path
 
 from pofy.common import ErrorCode

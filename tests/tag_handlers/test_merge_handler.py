@@ -1,4 +1,4 @@
-"""If handler tests."""
+"""Merge tag handler tests."""
 from typing import Any
 from typing import Optional
 
@@ -34,8 +34,8 @@ def _check_merge_tag(
     assert result == expected_value
 
 
-def test_if_tag_handler() -> None:
-    """Env tag should correctly load sequences of list or dicts."""
+def test_merge_tag_handler() -> None:
+    """Merge tag handler should correctly merge dictionnaries & lists."""
     # Merging list should work
     _check_merge_tag(
         ListField(StringField()),
@@ -66,7 +66,7 @@ def test_if_tag_handler() -> None:
 
 
 def test_merge_tag_handler_error_handling() -> None:
-    """Switch tag should correctly handle errors."""
+    """Merge tag should correctly handle errors."""
     _check_merge_tag(
         ListField(StringField()),
         '!merge scalar_value',

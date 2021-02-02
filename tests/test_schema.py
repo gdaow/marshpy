@@ -48,6 +48,7 @@ class _Child(_Parent):
         self.calls.append('child_post_load')
 
 
+# Used to test complex hierarchy setups
 class _NoSchemaSibling:
     pass
 

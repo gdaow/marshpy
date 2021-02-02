@@ -1,4 +1,4 @@
-"""If handler tests."""
+"""If tag handler tests."""
 from pofy.common import UNDEFINED
 from pofy.fields.dict_field import DictField
 from pofy.fields.list_field import ListField
