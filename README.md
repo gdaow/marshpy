@@ -8,7 +8,7 @@
 Pofy is a tiny library on top of PyYAML, allowing to add semantic on top of YAML
 and deserialize python object with data validation, custom field types, custom
 deserialization behaviors with YAML tags, YAML file inclusion from other
-files... Pofy was designed to allow easy declaration and using of complex
+files... Pofy was designed to allow easy declaration and utilisation of complex
 configurations in python.
 
 Pofy is distributed under the term of the WTFPL V2 (See COPYING file).
