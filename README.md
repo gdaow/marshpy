@@ -135,8 +135,9 @@ following values are accepted when loading a boolean from YAML :
 - For true : y, Y, yes, Yes, YES, true, True, TRUE, on, On, ON
 - For false : n, N, no, No, NO, false, False, FALSE, off, Off, OFF
 
-Any other value will raise a ValidationError, or call the defined error_handler
-with VALIDATION_ERROR as the error_code parameter.
+Any other value will raise a ValidationError, or call the defined
+[error handler](#error-handling) with VALIDATION_ERROR as the error_code
+parameter.
 
 ```python
   from pofy import BoolField, load
