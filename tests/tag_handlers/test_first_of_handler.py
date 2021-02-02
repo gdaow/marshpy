@@ -1,16 +1,16 @@
-"""If handler tests."""
+"""first-of tag handler tests."""
 from typing import Any
 from typing import Optional
 
 from pofy.common import UNDEFINED
 from pofy.fields.string_field import StringField
-from pofy.tag_handlers.switch_handler import SwitchHandler
+from pofy.tag_handlers.first_of_handler import FirstOfHandler
 from pofy.common import ErrorCode
 
 from tests.helpers import check_load
 
 
-def _check_switch_tag(
+def _check_first_of_tag(
     yaml: str,
     expected_value: Any = None,
     expected_error: Optional[ErrorCode] = None
@@ -22,7 +22,7 @@ def _check_switch_tag(
         yaml,
         field=StringField(),
         tag_handlers=[
-            SwitchHandler()
+            FirstOfHandler()
         ],
         expected_error=expected_error
     )
@@ -30,27 +30,27 @@ def _check_switch_tag(
     assert result == expected_value
 
 
-def test_switch_tag_handler() -> None:
-    """Switch tag should load first non-failure value in a list."""
-    _check_switch_tag(
-        '!switch [!fail value_1, !fail value_2, value_3]',
+def test_first_of_tag_handler() -> None:
+    """First of tag should load first non-failure value in a list."""
+    _check_first_of_tag(
+        '!first-of [!fail value_1, !fail value_2, value_3]',
         'value_3'
     )
 
-    _check_switch_tag(
-        '!switch [!fail value_1, !fail value_2, !fail value_3]',
+    _check_first_of_tag(
+        '!first-of [!fail value_1, !fail value_2, !fail value_3]',
         UNDEFINED
     )
 
 
-def test_switch_tag_handler_error_handling() -> None:
-    """Switch tag should correctly handle errors."""
-    _check_switch_tag(
-        '!switch scalar_value',
+def test_first_of_tag_handler_error_handling() -> None:
+    """First of tag should correctly handle errors."""
+    _check_first_of_tag(
+        '!first-of scalar_value',
         expected_error=ErrorCode.UNEXPECTED_NODE_TYPE
     )
 
-    _check_switch_tag(
-        '!switch {}',
+    _check_first_of_tag(
+        '!first-of {}',
         expected_error=ErrorCode.UNEXPECTED_NODE_TYPE
     )
