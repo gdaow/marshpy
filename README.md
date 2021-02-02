@@ -5,10 +5,10 @@
 [![Coverage Status](https://coveralls.io/repos/github/an-otter-world/pofy/badge.svg)](https://coveralls.io/github/an-otter-world/pofy)
 [![Matrix](https://img.shields.io/matrix/python-pofy:matrix.org?server_fqdn=matrix.org)](https://matrix.to/#/!SwCyFpSTQTLiPCNKTO:matrix.org?via=matrix.org)
 
-Pofy is a tiny library allowing to declare classes that can be deserialized
-from YAML, using pyyaml. Classes declares a schema as a list of fields, used
-to validate data during deserialization. Features include YAML inclusion,
-custom fields & validation.
+Pofy is a tiny library on top of PyYAML, allowing to add semantic on top of YAML
+and deserialize python object with data validation, custom field types, custom
+deserialization behaviors with YAML tags, YAML file inclusion from other
+files...
 
 Pofy is distributed under the term of the WTFPL V2 (See COPYING file).
 
@@ -35,23 +35,29 @@ improvements. Feel free to join [the Pofy channel on Matrix](https://matrix.to/#
       - [env](#env)
       - [glob](#glob)
       - [import / try-import](#import--try-import)
+      - [Custom tag handlers](#custom-tag-handlers)
     - [Hooks](#hooks)
       - [Field validation](#field-validation)
       - [Oject validation](#oject-validation)
       - [Post-load hook](#post-load-hook)
       - [Error handling](#error-handling)
-      - [Schema resolver](#schema-resolver)
     - [Creating Custom Fields](#creating-custom-fields)
 
 ## Installation
 
-Pofy is tested with Python 3.8. It be installed through pip :
+Pofy is tested with Python 3.6 through 3.9. It can be installed through pip :
 
   `pip install pofy`
 
 ## Quickstart
 
-To use Pofy, you must declare a schema in the class you want to deserialize :
+Pofy fields are defined in a Schema class, which is by default an inner class of
+the object you want to deserialize, called 'Schema'. The schema resolution can
+be customized through the [schema resolver](#schema-resolver) parameter of the
+load method, allowing to declare schema for existing classes without being
+intrusive.
+
+Once you declare the schema, you can load objects with the 'load' method :
 
   ```python
       from pofy import StringField, load
@@ -68,18 +74,15 @@ To use Pofy, you must declare a schema in the class you want to deserialize :
 
 ### Fields
 
-Pofy fields are defined in a 'Schema' inner class of the object you want to
-deserialize. Pofy comes with predefined fields described below. You can
-declare custom fields, to do so, refer to the [Custom Fields][#custom-fields]
-section.
+Pofy comes with predefined fields described below. You can declare custom
+fields, to do so, refer to the [custom Fields][#custom-fields] section.
 
 #### Common Parameters
 
-All field types accept a 'required' boolean parameter. If it's set and the
-field is not declared when loading a YAML document, a
-MissingRequiredFieldError will be raised, or the [error handler](#error-handler)
-you defined will be called with ErrorCode.MISSING_REQUIRED_FIELD as the
-error_code parameter :
+All field types accept a 'required' boolean parameter. If it's set and the field
+is absent in the YAML document, a MissingRequiredFieldError will be raised, or
+the [error handler](#error-handling) you defined will be called with
+ErrorCode.MISSING_REQUIRED_FIELD as the error_code parameter :
 
 ```python
   from pofy import StringField, load
@@ -92,12 +95,15 @@ error_code parameter :
   load('optional_field: some_value', Test) # Raises MissingRequiredFieldError
 ```
 
-All field types accept a 'validate' parameter. It's meant to be a python
-callable object accepting a ILoadingContext and the field deserialized
-object, and returning a boolean. If the returned value is False, pofy will
-raise a ValidationError or the [error handler](#error-handler) you defined will
-be called with ErrorCode.VALIDATION_ERROR as the error_code parameter. Notice
-that whole loaded objects can also be validated.
+All field types accept a 'validate' parameter. It must be a python callable
+object accepting a ILoadingContext , the field deserialized value, and must
+return a boolean if the field is valid, false other wise. See
+[object validation](#object-validation) for details about ILoadingContext, and
+on how to add informations to validation failure. If the validation fails, pofy
+will raise a ValidationError or the [error handler](#error-handling) you defined
+will be called with ErrorCode.VALIDATION_ERROR as the error_code parameter.
+Whole loaded objects can also be validated at once using the
+[object validation](#object-validation) system.
 
 ```python
   from pofy import StringField, load
@@ -110,7 +116,7 @@ that whole loaded objects can also be validated.
 
   class Test:
     class Schema:
-      color = StringField()
+      color = StringField(validate=_validate)
 
   load('color: yellow', Test) # Raises ValidationError
   load('color: blue', Test) # Raises ValidationError
@@ -118,7 +124,8 @@ that whole loaded objects can also be validated.
 
 #### BoolField
 
-BoolField loads a boolean from YAML. No additional parameter is available. The following values are accepted when loading a YAML object :
+BoolField loads a boolean from YAML. No additional parameter is available. The
+following values are accepted when loading a boolean from YAML :
 
 - For true : y, Y, yes, Yes, YES, true, True, TRUE, on, On, ON
 - For false : n, N, no, No, NO, false, False, FALSE, off, Off, OFF
@@ -141,9 +148,9 @@ with VALIDATION_ERROR as the error_code parameter.
 #### StringField
 
 StringField loads a string from YAML. The field constructor accept a 'pattern'
-parameter, that is meant to be a regular expression that deserialized values
+parameter, that must be a valid regular expression that deserialized values
 should match. If pattern is defined and the deserialized values doesn't match
-it, a ValidationError will be raised or the [error handler](#error-handler) you
+it, a ValidationError will be raised or the [error handler](#error-handling) you
 defined will be called with ErrorCode.VALIDATION_ERROR as the error_code
 parameter.
 
@@ -174,8 +181,8 @@ it accept several parameters :
   number, or if you want to use an exotic base.
 - minumum, maximum : Acceptable boundaries for the loaded value. If the value
   is out of bounds, a ValidationError will be raised, or the defined
-  error_handler will be called with ErrorCode.VALIDATION_ERROR as the error_code
-  parameter.
+  [error handler](#error-handling) will be called with
+  ErrorCode.VALIDATION_ERROR as the error_code parameter.
 
 ```python
   from pofy import IntField, load
@@ -199,8 +206,8 @@ parameters, it accept several specific ones :
 
 - minumum, maximum : Acceptable boundaries for the loaded value. If the value
   is out of bounds, a ValidationError will be raised, or the defined
-  error_handler will be called with ErrorCode.VALIDATION_ERROR as the error_code
-  parameter.
+  [error handler](#error-handling) will be called with
+  ErrorCode.VALIDATION_ERROR as the error_code parameter.
 
 ```python
   from pofy import FloatField, load
@@ -219,11 +226,11 @@ Enum Field loads a python Enum from yaml. Values of the enum are refered to by
 their name In addition to the common fields parameters, it accept the following
 specific one :
 
-- enum_class : The class of the python enum to deserialize.
+- enum_class (required) : The class of the python enum to deserialize.
 
-If the value in Yaml does not match any declared value, a ValidationError will
-be raised, or the defined error_handler will be called with
-ErrorCode.VALIDATION_ERROR as the error_code parameter.
+If the value in Yaml does not match any declared value of the enum, a
+ValidationError will be raised, or the defined [error handler](#error-handling)
+will be called with ErrorCode.VALIDATION_ERROR as the error_code parameter.
 
 ```python
   from enum import Enum
@@ -251,9 +258,26 @@ ErrorCode.VALIDATION_ERROR as the error_code parameter.
 
 ### Tag Handlers
 
-Pofy allows you to plug custom deserialization behavior when encountering yaml
-tags. These custom behaviors are called tag handlers. Pofy comes with some
-predefined tag handlers, described below. Custom tag handlers are defined the
+Tag handlers are custom deserialization behavior that are triggered when 
+encountering specific YAML tags. Pofy comes with some predefined tag handlers
+that are automatically registered when calling load, so the following tags are
+usable out of the box :
+
+#### env
+
+
+#### glob
+
+#### import / try-import
+
+The import and try import tags allows to import another YAML file as a field of
+the currently deserialized object :
+
+#### Custom tag handlers
+
+Pofy allows you to plug custom deserialization behavior when encountering some
+YAML tags, matching a given regular expression. These custom behaviors are
+called tag handlers, and are declared this way tag handlers are defined the
 following way :
 
 ```python
@@ -277,12 +301,11 @@ class ReverseHandler(TagHandler):
         return node.value.reverse()
 ```
 
-Check the API reference to see the methods available on ILoadingContext,
-containing the current YAML document loading state, and IBaseField,
-representing the currently deserialized field.
+Check the API reference to see the methods available on ILoadingContext and
+IBaseField, representing the currently deserialized field.
 
-To use it, the handler should be passed to the pofy 'load' methods through the
-'tag_handlers' arguments :
+Before using it in YAML, the handler should be registered when calling the pofy
+'load' methods through the 'tag_handlers' arguments :
 
 ```python
 
@@ -297,18 +320,6 @@ To use it, the handler should be passed to the pofy 'load' methods through the
   )
   assert test.string_field == 'dlrow olleH'
 ```
-
-Pofy comes with some predefined tag handlers that are automatically registered
-when calling load, so the following tags are usable out of the box :
-
-#### env
-
-#### glob
-
-#### import / try-import
-
-The import and try import tags allows to import another YAML file as a field of
-the currently deserialized object :
 
 ### Hooks
 
