@@ -395,9 +395,18 @@ Before using it in YAML, the handler should be registered when calling the pofy
 
 ### Hooks
 
-#### Field validation
+#### Validation
 
-#### Oject validation
+##### ILoadingContext
+
+An object of type ILoadingContext is passed to the different validation methods
+of Pofy. In the context of data validation, severial methods on this object
+are usefull :
+-
+
+##### Field validation
+
+##### Oject validation
 
 #### Post Load
 
