@@ -30,8 +30,8 @@ def _check_switch_tag(
     assert result == expected_value
 
 
-def test_if_tag_handler() -> None:
-    """Env tag should correctly load ifironment variables."""
+def test_switch_tag_handler() -> None:
+    """Switch tag should load first non-failure value in a list."""
     _check_switch_tag(
         '!switch [!fail value_1, !fail value_2, value_3]',
         'value_3'
