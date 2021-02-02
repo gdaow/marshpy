@@ -333,7 +333,7 @@ ErrorCode.UNEXPECTED_NODE_TYPE as the error_code parameter.
 
 #### first-of
 
-#### glob tag
+#### glob
 
 #### if
 
