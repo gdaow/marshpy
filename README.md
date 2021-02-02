@@ -8,7 +8,8 @@
 Pofy is a tiny library on top of PyYAML, allowing to add semantic on top of YAML
 and deserialize python object with data validation, custom field types, custom
 deserialization behaviors with YAML tags, YAML file inclusion from other
-files...
+files... Pofy was designed to allow easy declaration and using of complex
+configurations in python.
 
 Pofy is distributed under the term of the WTFPL V2 (See COPYING file).
 
@@ -32,15 +33,19 @@ improvements. Feel free to join [the Pofy channel on Matrix](https://matrix.to/#
       - [DictField](#dictfield)
       - [ObjectField](#objectfield)
     - [Tag Handlers](#tag-handlers)
-      - [env](#env)
-      - [glob](#glob)
-      - [import / try-import](#import--try-import)
-      - [Custom tag handlers](#custom-tag-handlers)
+      - [env](#env-handler)
+      - [first-of](#first-of-handler)
+      - [glob](#glob-handler)
+      - [if](#if-handler)
+      - [import / try-import](#import--try-import-handler)
+      - [merge](#merge-handler)
+      - [Custom Tag Handlers](#custom-tag-handlers)
     - [Hooks](#hooks)
-      - [Field validation](#field-validation)
-      - [Oject validation](#oject-validation)
-      - [Post-load hook](#post-load-hook)
-      - [Error handling](#error-handling)
+      - [Field Validation](#field-validation)
+      - [Object Validation](#object-validation)
+      - [Post Load hook](#post-load-hook)
+      - [Error Handling](#error-handling)
+      - [Schema Resolver]#schema-resolver)
     - [Creating Custom Fields](#creating-custom-fields)
 
 ## Installation
