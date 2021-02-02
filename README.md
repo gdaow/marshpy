@@ -307,7 +307,7 @@ usable out of the box :
 The env tag can be set on a YAML string value, and will load the value of the
 environment variable named like the tagged string. If the environment variable
 isn't set, the Pofy field will not be set either, allowing to eventually
-fallback on a default value (see [first-of](#first-of-handler) for example).
+fallback on a default value (see [first-of](#first-of) for example).
 
 If this tag is set on another value than a YAML scalar value, an
 UnexpectedNodeTypeError will be raised, or the defined
