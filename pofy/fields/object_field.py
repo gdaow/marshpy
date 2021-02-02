@@ -135,6 +135,7 @@ def _load(object_class: Type[Any], context: ILoadingContext) -> Any:
 
     result, set_fields = _load_object(object_class, fields, context)
     if _validate_object(result, fields, set_fields, context):
+        _post_load(result, context.get_schema_resolver())
         return result
 
     return UNDEFINED
@@ -169,9 +170,6 @@ def _load_object(
             continue
 
         setattr(result, field_name, field_value)
-
-    schema_resolver = context.get_schema_resolver()
-    _post_load(result, schema_resolver)
 
     return (result, set_fields)
 
