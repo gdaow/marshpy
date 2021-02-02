@@ -9,7 +9,7 @@ from tests.helpers import check_load
 
 
 def test_if_tag_handler() -> None:
-    """Env tag should correctly load ifironment variables."""
+    """If tag should load value only if tag is defined."""
     result = check_load(
         '!if(FLAG) test_value',
         field=StringField(),
