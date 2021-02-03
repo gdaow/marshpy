@@ -29,9 +29,9 @@ improvements. Feel free to join [the Pofy channel on Matrix](https://matrix.to/#
       - [FloatField](#floatfield)
       - [EnumField](#enumfield)
       - [PathField](#pathfield)
+      - [ObjectField](#objectfield)
       - [ListField](#listfield)
       - [DictField](#dictfield)
-      - [ObjectField](#objectfield)
     - [Tag Handlers](#tag-handlers)
       - [env](#env)
       - [first-of](#first-of)
@@ -291,6 +291,59 @@ not, say, a string).
 
 ```
 
+#### ObjectField
+
+ObjectField will load a custom object from the YAML. The deserialized object
+class should provide a schema, by declaring a nested 'Schema' class in the
+type class, or by any mean you configured through the
+[schema resolver](#schema-resolver) parameter of the load function. The type of
+the object to deserialize can be provided in YAML, with the !type tag (see
+example below), or by configuring the default type of the field in the
+ObjectField constructor. If no type is defined (no object_class given to the
+ObjectField constructor, and no type defined in the YAML), the field will not
+load the field at all. In addition to the common fields parameters, it accepts
+the following specific one :
+
+- object_class : Type[Any] optional : Default type of the object to load, if not
+  provided in YAML through the !type tag.
+
+```python
+  from pofy import ObjectField, StringField, load
+
+  class Child:
+    class Schema:
+      name = StringField()
+
+  class ChildSubClass(Child):
+    class Schema:
+       child_field = StringField()
+  
+  class Parent:
+    class Schema:
+      child = ObjectField(Child)
+
+  test = load(
+    'child:\n'
+    '  name: 'child_name',
+    Parent
+  )
+
+  assert isinstance(test.child, Child)
+  assert test.child.name == 'child_name'
+
+  test = load(
+    'child: !type python.module.ChildSubClass\n'
+    '  name: 'child_name'
+    '  child_field: 'child_field_value',
+    Parent
+  )
+
+  assert isinstance(test.child, ChildSubClass)
+  assert test.child.name == 'child_name'
+  assert test.child.child_field == 'child_field_value'
+
+```
+
 #### ListField
 
 ListField will load a list from the YAML. In addition to the common fields
@@ -330,11 +383,47 @@ list of another object as member :
 
 #### DictField
 
-#### ObjectField
+DictField will load a dictionary from the YAML. Only strings are supported as
+keys for now. In addition to the common fields parameters, it accept the
+following specific one :
+
+- item_field (Field) : The field used to load each item's value in the list.
+
+Here is an example of how should be declared the schema of an object having a
+dictionary of another object as member :
+
+```python
+  from pofy import DictField, ObjectField, load
+
+  class Child:
+    class Schema:
+      name = StringField()
+
+  class Parent:
+    class Schema:
+      children = DictField(
+        ObjectField(Child)
+      )
+
+  parent = load(
+    'children:'
+    '  first:
+    '    name: first_child'
+    '  second:',
+    '    name: second_child',
+    Parent
+  )
+
+  assert isinstance(parent.child['first'], Child)
+  assert isinstance(parent.child['second'], Child)
+  assert parent.child['first'].name == 'first_child'
+  assert parent.child['second'].name == 'second_child'
+
+```
 
 ### Tag Handlers
 
-Tag handlers are custom deserialization behavior that are triggered when 
+Tag handlers are custom deserialization behaviors that are triggered when 
 encountering specific YAML tags. Pofy comes with some predefined tag handlers
 that are automatically registered when calling load, so the following tags are
 usable out of the box :
