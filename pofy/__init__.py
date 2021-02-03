@@ -1,6 +1,7 @@
 """YAML python object deserializer."""
 
 from .core.constants import UNDEFINED
+from .core.constants import SchemaResolver
 from .core.errors import BadTypeFormatError
 from .core.errors import ErrorCode
 from .core.errors import ErrorHandler
@@ -33,7 +34,8 @@ from .loader import load
 
 from .tag_handlers.env_handler import EnvHandler
 from .tag_handlers.glob_handler import GlobHandler
+from .tag_handlers.if_handler import IfHandler
 from .tag_handlers.import_handler import ImportHandler
+from .tag_handlers.merge_handler import MergeHandler
 from .tag_handlers.path_handler import PathHandler
 from .tag_handlers.tag_handler import TagHandler
-from .tag_handlers.if_handler import IfHandler
