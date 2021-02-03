@@ -21,6 +21,10 @@ improvements. Feel free to join [the Pofy channel on Matrix](https://matrix.to/#
   - [Installation](#installation)
   - [Quickstart](#quickstart)
   - [Reference](#reference)
+    - [Schemas](#schemas)
+      - [Object Validation](#object-validation)
+      - [Post Load Hook](#post-load-hook)
+      - [Schema Resolver](#schema-resolver)
     - [Fields](#fields)
       - [Common Parameters](#common-parameters)
       - [BoolField](#boolfield)
@@ -40,12 +44,7 @@ improvements. Feel free to join [the Pofy channel on Matrix](https://matrix.to/#
       - [import / try-import](#import--try-import)
       - [merge](#merge)
       - [Custom Tag Handlers](#custom-tag-handlers)
-    - [Hooks](#hooks)
-      - [Field Validation](#field-validation)
-      - [Object Validation](#object-validation)
-      - [Post Load](#post-load)
-      - [Error Handling](#error-handling)
-      - [Schema Resolver](#schema-resolver)
+    - [Custom Error Handling](#custom-error-handling)
     - [Creating Custom Fields](#creating-custom-fields)
 
 ## Installation
@@ -76,6 +75,38 @@ Once you declare the schema, you can load objects with the 'load' method :
   ```
 
 ## Reference
+
+### Schemas
+
+Schemas are python classe declaring how a python type should be deserialized
+from YAML. They can contain a list of [fields](#fields) as class members, as
+showed in the [quickstart section](#quickstart). They can declare hook methods
+that can be used for object validation and post-load operations. By default, the
+Schema for a python class is looked up by searching for a nested class named
+'Schema'. This behavior is customizable through the
+[schema_resolver](#schema-resolver) argument passed to the load() method.
+
+#### Object Validation
+
+An object of type ValidationContext is passed to the different validation
+methods of Pofy. It provides the following methods :
+
+- current_location() : If the current YAML document was loaded from a file,
+  returns the said file, else returns None
+
+- error(message_format, *args, **kwargs) : Will raise a ValidationError, or
+  or the defined [error handler](#error-handling) will be called with
+  ErrorCode.VALIDATION_ERROR as the error_code parameter, and the given string
+  format formatted with *args and **kwargs as message.
+
+If no error_handler is defined when loading a YAML document, an exception will
+be raised, terminating the loading at the first call of error(). However, if
+some custom error handling is set up, the execution will continue after the
+first validation error, so be aware of that when writing validation methods.
+
+#### Post Load Hook
+
+#### Schema Resolver
 
 ### Fields
 
@@ -519,26 +550,7 @@ Before using it in YAML, the handler should be registered when calling the pofy
   assert test.string_field == 'dlrow olleH'
 ```
 
-### Hooks
-
-#### Validation
-
-##### ILoadingContext
-
-An object of type ILoadingContext is passed to the different validation methods
-of Pofy. In the context of data validation, severial methods on this object
-are usefull :
--
-
-##### Field validation
-
-##### Oject validation
-
-#### Post Load
-
-#### Error Handling
-
-#### Schema Resolver
+### Custom Error Handling
 
 ### Creating Custom Fields
 
