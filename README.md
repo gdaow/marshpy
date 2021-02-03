@@ -293,16 +293,16 @@ not, say, a string).
 
 #### ObjectField
 
-ObjectField will load a custom object from the YAML. The deserialized object
-class should provide a schema, by declaring a nested 'Schema' class in the
-type class, or by any mean you configured through the
+ObjectField will load a custom pythn object from the YAML. The deserialized
+object class should provide a schema, by declaring a nested 'Schema' class in
+the deserialized's object class, or by any mean you configured through the
 [schema resolver](#schema-resolver) parameter of the load function. The type of
 the object to deserialize can be provided in YAML, with the !type tag (see
 example below), or by configuring the default type of the field in the
 ObjectField constructor. If no type is defined (no object_class given to the
 ObjectField constructor, and no type defined in the YAML), the field will not
-load the field at all. In addition to the common fields parameters, it accepts
-the following specific one :
+be loaded. So in addition to the common fields parameters, it accepts the
+following specific one :
 
 - object_class : Type[Any] optional : Default type of the object to load, if not
   provided in YAML through the !type tag.
