@@ -7,7 +7,10 @@ from typing import Optional
 from typing import Type
 from typing import cast
 
-from pofy.interfaces import ILoadingContext
+from pofy.core.interfaces import ILoadingContext
+
+
+SchemaResolver = Callable[[Type[Any]], Optional[Type[Any]]]
 
 
 class SchemaBase:

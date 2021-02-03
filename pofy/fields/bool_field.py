@@ -2,10 +2,10 @@
 from gettext import gettext as _
 from typing import Any
 
-from pofy.common import ErrorCode
-from pofy.common import UNDEFINED
+from pofy.core.errors import ErrorCode
+from pofy.core.constants import UNDEFINED
 from pofy.fields.base_field import ScalarField
-from pofy.interfaces import ILoadingContext
+from pofy.core.interfaces import ILoadingContext
 
 
 class BoolField(ScalarField):

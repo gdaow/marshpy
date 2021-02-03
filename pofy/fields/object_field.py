@@ -12,13 +12,13 @@ from typing import Set
 from typing import Type
 from typing import cast
 
-from pofy.common import ErrorCode
-from pofy.common import SchemaResolver
-from pofy.common import UNDEFINED
+from pofy.core.constants import UNDEFINED
+from pofy.core.errors import ErrorCode
+from pofy.core.interfaces import ILoadingContext
+from pofy.core.schema import SchemaResolver
 from pofy.fields.base_field import BaseField
 from pofy.fields.base_field import ValidateCallback
 from pofy.fields.string_field import StringField
-from pofy.interfaces import ILoadingContext
 
 
 _TYPE_FORMAT_MSG = _("""\

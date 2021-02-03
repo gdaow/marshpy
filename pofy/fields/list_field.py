@@ -3,10 +3,10 @@ from gettext import gettext as _
 from typing import Any
 from typing import Optional
 
-from pofy.common import UNDEFINED
+from pofy.core.constants import UNDEFINED
+from pofy.core.interfaces import ILoadingContext
 from pofy.fields.base_field import BaseField
 from pofy.fields.base_field import ValidateCallback
-from pofy.interfaces import ILoadingContext
 
 
 class ListField(BaseField):

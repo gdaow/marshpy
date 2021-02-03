@@ -2,8 +2,8 @@
 from typing import List
 from typing import Optional
 
-from pofy.interfaces import ILoadingContext
-from pofy.schema import SchemaBase
+from pofy.core.interfaces import ILoadingContext
+from pofy.core.schema import SchemaBase
 
 from tests.helpers import check_load
 

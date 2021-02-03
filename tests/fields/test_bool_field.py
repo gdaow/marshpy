@@ -1,7 +1,7 @@
 """String field tests."""
 from typing import Optional
 
-from pofy.common import ErrorCode
+from pofy.core.errors import ErrorCode
 from pofy.fields.bool_field import BoolField
 
 from tests.helpers import check_field

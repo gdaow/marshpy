@@ -5,8 +5,8 @@ from typing import List
 from typing import Optional
 from typing import Type
 
-from pofy.common import ErrorCode
-from pofy.common import UNDEFINED
+from pofy.core.constants import UNDEFINED
+from pofy.core.errors import ErrorCode
 from pofy.fields.list_field import ListField
 from pofy.fields.string_field import StringField
 from pofy.tag_handlers.path_handler import PathHandler

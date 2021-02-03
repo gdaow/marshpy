@@ -7,12 +7,12 @@ from typing import Type
 
 from yaml import Node
 
-from pofy.common import ErrorCode
-from pofy.common import UNDEFINED
+from pofy.core.constants import UNDEFINED
+from pofy.core.errors import ErrorCode
+from pofy.core.interfaces import ILoadingContext
 from pofy.fields.list_field import ListField
 from pofy.fields.object_field import ObjectField
 from pofy.fields.string_field import StringField
-from pofy.interfaces import ILoadingContext
 from pofy.loader import load
 
 from tests.helpers import FailTagHandler

@@ -15,10 +15,11 @@ from typing import cast
 
 from yaml import compose
 
-from pofy.common import ErrorHandler
-from pofy.common import UNDEFINED
-from pofy.common import LoadResult
-from pofy.common import SchemaResolver
+from pofy.core.constants import LoadResult
+from pofy.core.constants import UNDEFINED
+from pofy.core.errors import ErrorHandler
+from pofy.core.loading_context import LoadingContext
+from pofy.core.schema import SchemaResolver
 from pofy.fields.base_field import BaseField
 from pofy.fields.bool_field import BoolField
 from pofy.fields.dict_field import DictField
@@ -27,7 +28,6 @@ from pofy.fields.int_field import IntField
 from pofy.fields.list_field import ListField
 from pofy.fields.object_field import ObjectField
 from pofy.fields.string_field import StringField
-from pofy.loading_context import LoadingContext
 from pofy.tag_handlers.env_handler import EnvHandler
 from pofy.tag_handlers.glob_handler import GlobHandler
 from pofy.tag_handlers.if_handler import IfHandler
@@ -90,7 +90,7 @@ def load(
     if tag_handlers is not None:
         for handler_it in tag_handlers:
             assert isinstance(handler_it, TagHandler), \
-                _('tag_handlers items should be subclass of TagHandler')
+                _('tag_handlers items should be subclasses of TagHandler')
         all_tag_handlers.extend(tag_handlers)
 
     all_tag_handlers.append(ImportHandler(resolve_roots))

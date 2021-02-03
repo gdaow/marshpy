@@ -1,7 +1,7 @@
 """Glob tag handler tests."""
 from pathlib import Path
 
-from pofy.common import ErrorCode
+from pofy.core.errors import ErrorCode
 from pofy.tag_handlers.glob_handler import GlobHandler
 
 from tests.tag_handlers.path_handler_helpers import check_path_tag

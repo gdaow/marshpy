@@ -1,8 +1,8 @@
 """Import handler tests."""
 from pathlib import Path
 
-from pofy.common import ErrorCode
-from pofy.common import UNDEFINED
+from pofy.core.constants import UNDEFINED
+from pofy.core.errors import ErrorCode
 from pofy.tag_handlers.import_handler import ImportHandler
 
 from tests.tag_handlers.path_handler_helpers import check_path_tag

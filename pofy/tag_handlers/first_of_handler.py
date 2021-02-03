@@ -2,9 +2,9 @@
 from typing import Any
 from yaml import SequenceNode
 
-from pofy.common import UNDEFINED
-from pofy.interfaces import IBaseField
-from pofy.interfaces import ILoadingContext
+from pofy.core.constants import UNDEFINED
+from pofy.core.interfaces import IBaseField
+from pofy.core.interfaces import ILoadingContext
 from pofy.tag_handlers.tag_handler import TagHandler
 
 

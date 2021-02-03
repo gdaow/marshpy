@@ -2,10 +2,10 @@
 from typing import Any
 from typing import Optional
 
-from pofy.common import UNDEFINED
+from pofy.core.constants import UNDEFINED
+from pofy.core.errors import ErrorCode
 from pofy.fields.string_field import StringField
 from pofy.tag_handlers.first_of_handler import FirstOfHandler
-from pofy.common import ErrorCode
 
 from tests.helpers import check_load
 

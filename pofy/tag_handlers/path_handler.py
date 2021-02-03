@@ -12,9 +12,9 @@ from yaml import Node
 from yaml import compose
 from yaml.parser import ParserError
 
-from pofy.common import ErrorCode
-from pofy.interfaces import IBaseField
-from pofy.interfaces import ILoadingContext
+from pofy.core.errors import ErrorCode
+from pofy.core.interfaces import IBaseField
+from pofy.core.interfaces import ILoadingContext
 from pofy.tag_handlers.tag_handler import TagHandler
 
 

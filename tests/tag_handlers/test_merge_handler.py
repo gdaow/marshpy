@@ -2,8 +2,8 @@
 from typing import Any
 from typing import Optional
 
-from pofy.common import ErrorCode
-from pofy.common import UNDEFINED
+from pofy.core.constants import UNDEFINED
+from pofy.core.errors import ErrorCode
 from pofy.fields.base_field import BaseField
 from pofy.fields.dict_field import DictField
 from pofy.fields.list_field import ListField

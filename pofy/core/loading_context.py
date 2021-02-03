@@ -14,12 +14,12 @@ from yaml import Node
 from yaml import ScalarNode
 from yaml import SequenceNode
 
-from pofy.common import ErrorCode
-from pofy.common import SchemaResolver
-from pofy.common import get_exception_type
-from pofy.interfaces import IBaseField
-from pofy.interfaces import ILoadingContext
-from pofy.schema import default_schema_resolver
+from pofy.core.constants import SchemaResolver
+from pofy.core.errors import ErrorCode
+from pofy.core.errors import get_exception_type
+from pofy.core.interfaces import IBaseField
+from pofy.core.interfaces import ILoadingContext
+from pofy.core.schema import default_schema_resolver
 from pofy.tag_handlers.tag_handler import TagHandler
 
 ErrorHandler = Optional[Callable[[Node, ErrorCode, str], Any]]

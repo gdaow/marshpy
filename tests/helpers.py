@@ -10,13 +10,13 @@ from typing import Union
 from yaml import Node
 from yaml import compose
 
-from pofy.common import ErrorCode
-from pofy.common import UNDEFINED
+from pofy.core.constants import UNDEFINED
+from pofy.core.errors import ErrorCode
+from pofy.core.interfaces import IBaseField
+from pofy.core.interfaces import ILoadingContext
+from pofy.core.loading_context import LoadingContext
 from pofy.fields.base_field import BaseField
 from pofy.fields.object_field import ObjectField
-from pofy.interfaces import IBaseField
-from pofy.interfaces import ILoadingContext
-from pofy.loading_context import LoadingContext
 from pofy.tag_handlers.tag_handler import TagHandler
 
 

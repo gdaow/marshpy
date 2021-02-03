@@ -1,5 +1,5 @@
 """If tag handler tests."""
-from pofy.common import UNDEFINED
+from pofy.core.constants import UNDEFINED
 from pofy.fields.dict_field import DictField
 from pofy.fields.list_field import ListField
 from pofy.fields.string_field import StringField

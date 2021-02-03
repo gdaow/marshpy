@@ -1,7 +1,7 @@
 """Yaml object loading tests."""
-from pofy.common import ErrorCode
+from pofy.core.errors import ErrorCode
+from pofy.core.interfaces import ILoadingContext
 from pofy.fields.string_field import StringField
-from pofy.interfaces import ILoadingContext
 
 from tests.helpers import check_field_error
 

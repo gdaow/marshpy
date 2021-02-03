@@ -5,12 +5,12 @@ from pytest import raises
 from yaml import Node
 from yaml.error import Mark
 
-from pofy.common import ErrorCode
-from pofy.common import PofyValueError
+from pofy.core.errors import ErrorCode
+from pofy.core.errors import PofyValueError
+from pofy.core.interfaces import IBaseField
+from pofy.core.interfaces import ILoadingContext
+from pofy.core.loading_context import LoadingContext
 from pofy.fields.base_field import BaseField
-from pofy.interfaces import IBaseField
-from pofy.interfaces import ILoadingContext
-from pofy.loading_context import LoadingContext
 from pofy.tag_handlers.tag_handler import TagHandler
 
 from tests.helpers import check_load
