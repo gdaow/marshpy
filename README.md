@@ -229,7 +229,7 @@ parameters, it accept several specific ones :
 #### EnumField
 
 Enum Field loads a python Enum from yaml. Values of the enum are refered to by
-their name In addition to the common fields parameters, it accept the following
+their name. In addition to the common fields parameters, it accept the following
 specific one :
 
 - enum_class (required) : The class of the python enum to deserialize.
@@ -256,11 +256,13 @@ will be called with ErrorCode.VALIDATION_ERROR as the error_code parameter.
 
 #### PathField
 
-PathField will load a pathlib.Path object from the YAML. If the 'must_exist'
-parameter is set to True and the deserialized path don't point to an existing
-file or folder, a ValidationError will be raised, or the defined
-[error handler](#error-handling) will be called with ErrorCode.VALIDATION_ERROR
-as the error_code parameter.
+PathField will load a pathlib.Path object from the YAML. In addition to the
+common fields parameters, it accept the following specific one :
+
+- must_exist (bool) : If set to True and the deserialized path don't point to an
+  existing file or folder, a ValidationError will be raised, or the defined
+  [error handler](#error-handling) will be called with
+  ErrorCode.VALIDATION_ERROR as the error_code parameter.
 
 If the path in the YAML document is relative, and doesn't exists relatively to
 the current working dir, Pofy will try to resolve it relatively to the current
