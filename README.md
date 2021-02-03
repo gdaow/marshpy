@@ -293,6 +293,41 @@ not, say, a string).
 
 #### ListField
 
+ListField will load a list from the YAML. In addition to the common fields
+parameters, it accept the following specific one :
+
+- item_field (Field) : The field used to load each item in the list.
+
+Here is an example of how should be declared the schema of an object having a
+list of another object as member :
+
+```python
+  from pofy import ListField, ObjectField, load
+
+  class Child:
+    class Schema:
+      name = StringField()
+
+  class Parent:
+    class Schema:
+      children = ListField(
+        ObjectField(Child)
+      )
+
+  parent = load(
+    'children:'
+    '  - name: first_child'
+    '  - name: second_child',
+    Parent
+  )
+
+  assert isinstance(parent.child[0], Child)
+  assert isinstance(parent.child[1], Child)
+  assert parent.child[0].name == 'first_child'
+  assert parent.child[1].name == 'second_child'
+
+```
+
 #### DictField
 
 #### ObjectField
