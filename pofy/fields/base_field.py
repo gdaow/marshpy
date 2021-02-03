@@ -10,9 +10,10 @@ from pofy.core.constants import UNDEFINED
 from pofy.core.errors import ErrorCode
 from pofy.core.interfaces import IBaseField
 from pofy.core.interfaces import ILoadingContext
+from pofy.core.validation_context import ValidationContext
 
 
-ValidateCallback = Callable[[ILoadingContext, Any], bool]
+ValidateCallback = Callable[[ValidationContext, Any], bool]
 PostLoadCallback = Callable[[Any], None]
 
 
@@ -57,8 +58,10 @@ class BaseField(IBaseField):
         field_value = self._load(context)
 
         validate = self._validate
-        if validate is not None and not validate(context, field_value):
-            return UNDEFINED
+        if validate is not None:
+            validation_context = ValidationContext(context)
+            if not validate(validation_context, field_value):
+                return UNDEFINED
 
         return field_value
 

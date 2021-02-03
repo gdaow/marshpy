@@ -5,6 +5,7 @@ from typing import Optional
 from pofy.core.constants import UNDEFINED
 from pofy.core.errors import ErrorCode
 from pofy.core.interfaces import ILoadingContext
+from pofy.core.validation_context import ValidationContext
 from pofy.fields.bool_field import BoolField
 from pofy.fields.object_field import ObjectField
 from pofy.fields.string_field import StringField
@@ -22,10 +23,10 @@ class _Owned:
         error = BoolField()
 
         @classmethod
-        def validate(cls, context: ILoadingContext, obj: Any) -> bool:
+        def validate(cls, context: ValidationContext, obj: Any) -> bool:
             """Validate."""
             if getattr(obj, 'error', False):
-                context.error(ErrorCode.VALIDATION_ERROR, 'Error')
+                context.error('Error')
                 return False
             obj.parent_validate_called = True
             return True

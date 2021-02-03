@@ -16,6 +16,7 @@ from pofy.core.constants import UNDEFINED
 from pofy.core.errors import ErrorCode
 from pofy.core.interfaces import ILoadingContext
 from pofy.core.schema import SchemaResolver
+from pofy.core.validation_context import ValidationContext
 from pofy.fields.base_field import BaseField
 from pofy.fields.base_field import ValidateCallback
 from pofy.fields.string_field import StringField
@@ -191,8 +192,10 @@ def _validate_object(
             )
 
     schema_resolver = context.get_schema_resolver()
-    for validate in _get_methods(object_class, 'validate', schema_resolver):
-        if not validate(context, obj):
+    validation_context = ValidationContext(context)
+    for method in _get_methods(object_class, 'validate', schema_resolver):
+        validate = cast(ValidateCallback, method)
+        if not validate(validation_context, obj):
             valid_object = False
 
     return valid_object

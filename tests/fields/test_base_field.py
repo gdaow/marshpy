@@ -1,6 +1,6 @@
 """Yaml object loading tests."""
 from pofy.core.errors import ErrorCode
-from pofy.core.interfaces import ILoadingContext
+from pofy.core.validation_context import ValidationContext
 from pofy.fields.string_field import StringField
 
 from tests.helpers import check_field_error
@@ -8,8 +8,8 @@ from tests.helpers import check_field_error
 
 def test_field_validation() -> None:
     """Custom field validation should behave correctly."""
-    def _validate(context: ILoadingContext, _: str) -> bool:
-        context.error(ErrorCode.VALIDATION_ERROR, 'Test')
+    def _validate(context: ValidationContext, _: str) -> bool:
+        context.error('Test')
         return False
 
     class _ValidateFieldObject:
