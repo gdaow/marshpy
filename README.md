@@ -617,6 +617,36 @@ ErrorCode.UNEXPECTED_NODE_TYPE as the error_code parameter.
 
 #### first-of
 
+The first-of tag can be set on a YAML list value, and will load the first value
+of the list that is not undefined. This can be used with [the env tag](#env),
+[the if tag](#if) or the [try-import tag](#import-try--import) to provide
+fallback values for fields, for example.
+
+If this tag is set on another value than a YAML list value, an
+UnexpectedNodeTypeError will be raised, or the defined
+[error handler](#error-handling) will be called with
+ErrorCode.UNEXPECTED_NODE_TYPE as the error_code parameter.
+
+```python
+
+  from pofy import StringField, load
+
+  class Test:
+    class Schema:
+      color = StringField()
+
+  test = load(
+    'string_field: !first-of'
+    ' - !env ENV_COLOR'
+    ' - default_color',
+    Test
+  )
+
+  assert test.color == 'red' # if ENV_COLOR is set to red
+  assert test.color == 'default_color' # if ENV_COLOR is not defined
+
+```
+
 #### glob
 
 #### if
@@ -636,6 +666,7 @@ called tag handlers, and are declared this way tag handlers are defined the
 following way :
 
 ```python
+
 from pofy import TagHandler
 from pofy import ILoadingContext
 from pofy import IBaseField
@@ -654,6 +685,7 @@ class ReverseHandler(TagHandler):
         # Return the value of the current yaml node reversed.
         node = context.current_node()
         return node.value.reverse()
+
 ```
 
 Check the API reference to see the methods available on ILoadingContext and
@@ -674,6 +706,7 @@ Before using it in YAML, the handler should be registered when calling the pofy
     tag_handlers=[ReverseHandler()]
   )
   assert test.string_field == 'dlrow olleH'
+
 ```
 
 ### Custom Error Handling
