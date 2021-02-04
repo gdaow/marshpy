@@ -8,8 +8,8 @@ from typing import Type
 from pofy.core.constants import UNDEFINED
 from pofy.core.errors import ErrorCode
 from pofy.core.interfaces import ILoadingContext
+from pofy.core.validation import ValidateCallback
 from pofy.fields.base_field import ScalarField
-from pofy.fields.base_field import ValidateCallback
 
 
 class EnumField(ScalarField):

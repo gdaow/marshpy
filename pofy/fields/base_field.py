@@ -2,7 +2,6 @@
 from abc import abstractmethod
 from gettext import gettext as _
 from typing import Any
-from typing import Callable
 from typing import Optional
 from typing import Union
 
@@ -10,11 +9,8 @@ from pofy.core.constants import UNDEFINED
 from pofy.core.errors import ErrorCode
 from pofy.core.interfaces import IBaseField
 from pofy.core.interfaces import ILoadingContext
-from pofy.core.validation_context import ValidationContext
-
-
-ValidateCallback = Callable[[ValidationContext, Any], bool]
-PostLoadCallback = Callable[[Any], None]
+from pofy.core.validation import ValidateCallback
+from pofy.core.validation import ValidationContext
 
 
 class BaseField(IBaseField):
@@ -60,7 +56,8 @@ class BaseField(IBaseField):
         validate = self._validate
         if validate is not None:
             validation_context = ValidationContext(context)
-            if not validate(validation_context, field_value):
+            validate(validation_context, field_value)
+            if validation_context.has_error():
                 return UNDEFINED
 
         return field_value

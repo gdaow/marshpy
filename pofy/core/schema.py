@@ -7,7 +7,7 @@ from typing import Optional
 from typing import Type
 from typing import cast
 
-from pofy.core.interfaces import ILoadingContext
+from pofy.core.validation import ValidationContext
 
 
 SchemaResolver = Callable[[Type[Any]], Optional[Type[Any]]]
@@ -17,7 +17,7 @@ class SchemaBase:
     """Default Schema class base, bringing some helpers."""
 
     @classmethod
-    def validate(cls, context: ILoadingContext, obj: Any) -> bool:
+    def validate(cls, context: ValidationContext, obj: Any) -> None:
         """Validate deserialized object.
 
         Will call validate directly on the deserialized object. If a parent
@@ -27,11 +27,9 @@ class SchemaBase:
         """
         validate = cls._find_hook(obj.__class__, 'validate')
         if validate is None:
-            return True
+            return
 
-        result = validate(obj, context)
-        assert isinstance(result, bool)
-        return result
+        validate(obj, context)
 
     @classmethod
     def post_load(cls, obj: Any) -> None:

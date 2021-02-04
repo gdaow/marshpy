@@ -2,8 +2,8 @@
 from typing import List
 from typing import Optional
 
-from pofy.core.interfaces import ILoadingContext
 from pofy.core.schema import SchemaBase
+from pofy.core.validation import ValidationContext
 
 from tests.helpers import check_load
 
@@ -17,16 +17,16 @@ class _Parent(_NoSchemaParent):
     def __init__(self) -> None:
         super().__init__()
         self.calls: List[str] = []
-        self.validation_context: Optional[ILoadingContext] = None
+        self.validation_context: Optional[ValidationContext] = None
 
     class Schema(SchemaBase):
         """Pofy fields."""
 
-    def validate(self, context: ILoadingContext) -> bool:
+    def validate(self, context: ValidationContext) -> None:
         """Validate this object."""
+        assert isinstance(context, ValidationContext)
         self.calls.append('parent_validate')
         self.validation_context = context
-        return True
 
     def post_load(self) -> None:
         """Do post loading operation."""
@@ -38,10 +38,10 @@ class _Child(_Parent):
     class Schema(SchemaBase):
         """Pofy fields."""
 
-    def validate(self, _: ILoadingContext) -> bool:
+    def validate(self, context: ValidationContext) -> None:
         """Validate this object."""
+        assert isinstance(context, ValidationContext)
         self.calls.append('child_validate')
-        return True
 
     def post_load(self) -> None:
         """Do post loading operation."""

@@ -5,8 +5,8 @@ from typing import Optional
 
 from pofy.core.constants import UNDEFINED
 from pofy.core.interfaces import ILoadingContext
+from pofy.core.validation import ValidateCallback
 from pofy.fields.base_field import BaseField
-from pofy.fields.base_field import ValidateCallback
 
 
 class ListField(BaseField):

@@ -1,9 +1,13 @@
-"""Validation context class & utilities."""
+"""Validation related class & utilities."""
 from typing import Any
 from typing import Optional
+from typing import Callable
 
 from pofy.core.errors import ErrorCode
 from pofy.core.interfaces import ILoadingContext
+
+
+ValidateCallback = Callable[['ValidationContext', Any], None]
 
 
 class ValidationContext:
@@ -11,6 +15,7 @@ class ValidationContext:
 
     def __init__(self, loading_context: ILoadingContext):
         """Initialize validation context."""
+        self._has_error = False
         self._loading_context = loading_context
 
     def current_location(self) -> Optional[str]:
@@ -33,9 +38,14 @@ class ValidationContext:
             *args, **kwargs: Arguments used to format message.
 
         """
+        self._has_error = True
         self._loading_context.error(
             ErrorCode.VALIDATION_ERROR,
             message_format,
             *args,
             **kwargs
         )
+
+    def has_error(self) -> bool:
+        """Return true if the error was called at least once."""
+        return self._has_error
