@@ -7,12 +7,12 @@ from typing import Type
 
 from yaml import Node
 
-from pofy.common import ErrorCode
-from pofy.common import UNDEFINED
+from pofy.core.constants import UNDEFINED
+from pofy.core.errors import ErrorCode
+from pofy.core.interfaces import ILoadingContext
 from pofy.fields.list_field import ListField
 from pofy.fields.object_field import ObjectField
 from pofy.fields.string_field import StringField
-from pofy.interfaces import ILoadingContext
 from pofy.loader import load
 
 from tests.helpers import FailTagHandler
@@ -140,3 +140,32 @@ def test_error_hanlder_is_called() -> None:
 
     load('[a, list]', str, error_handler=_handler)
     assert handler_called
+
+
+def test_schema_resolver_is_called() -> None:
+    """The given schema_resolver should be called when defined."""
+    resolver_called = False
+
+    class _Schema:
+        string_field = StringField()
+
+    class _Object:
+        def __init__(self) -> None:
+            self.string_field = 'default value'
+
+    def _schema_resolver(cls: Type[Any]) -> Optional[Type[Any]]:
+        nonlocal resolver_called
+        if cls == _Object:
+            resolver_called = True
+            return _Schema
+        return None
+
+    result = load(
+        'string_field: value',
+        object_class=_Object,
+        schema_resolver=_schema_resolver
+    )
+
+    assert resolver_called
+    assert isinstance(result, _Object)
+    assert result.string_field == 'value'

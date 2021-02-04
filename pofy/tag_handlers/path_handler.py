@@ -12,9 +12,9 @@ from yaml import Node
 from yaml import compose
 from yaml.parser import ParserError
 
-from pofy.common import ErrorCode
-from pofy.interfaces import IBaseField
-from pofy.interfaces import ILoadingContext
+from pofy.core.errors import ErrorCode
+from pofy.core.interfaces import IBaseField
+from pofy.core.interfaces import ILoadingContext
 from pofy.tag_handlers.tag_handler import TagHandler
 
 
@@ -33,7 +33,7 @@ class PathHandler(TagHandler):
         """Initialize the PathHandler.
 
         Args:
-            roots: Roots paths to use when resolving files.
+            roots:          Roots paths to use when resolving files.
             allow_relative: If set to True, the handler will try to load files
                             relative to the current YAML file, if applicable.
 

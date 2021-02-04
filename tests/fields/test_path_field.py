@@ -1,7 +1,7 @@
 """Path field tests."""
 from pathlib import Path
 
-from pofy.common import ErrorCode
+from pofy.core.errors import ErrorCode
 from pofy.fields.path_field import PathField
 
 from tests.helpers import check_field

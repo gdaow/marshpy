@@ -5,8 +5,8 @@ from typing import Optional
 
 from yaml import Node
 
-from pofy.common import ErrorCode
-from pofy.common import SchemaResolver
+from pofy.core.constants import SchemaResolver
+from pofy.core.errors import ErrorCode
 
 
 class IBaseField:

@@ -1,5 +1,5 @@
 """Integer field tests."""
-from pofy.common import ErrorCode
+from pofy.core.errors import ErrorCode
 from pofy.fields.int_field import IntField
 
 from tests.helpers import check_field

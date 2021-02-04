@@ -10,8 +10,8 @@ from typing import Any
 
 from yaml import Node
 
-from pofy.interfaces import IBaseField
-from pofy.interfaces import ILoadingContext
+from pofy.core.interfaces import IBaseField
+from pofy.core.interfaces import ILoadingContext
 
 
 class TagHandler(ABC):

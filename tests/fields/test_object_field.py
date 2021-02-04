@@ -2,12 +2,12 @@
 from typing import Any
 from typing import Optional
 
-from pofy.common import ErrorCode
-from pofy.common import UNDEFINED
+from pofy.core.constants import UNDEFINED
+from pofy.core.errors import ErrorCode
+from pofy.core.validation import ValidationContext
 from pofy.fields.bool_field import BoolField
 from pofy.fields.object_field import ObjectField
 from pofy.fields.string_field import StringField
-from pofy.interfaces import ILoadingContext
 
 from tests.helpers import check_field_error
 from tests.helpers import check_load
@@ -22,13 +22,12 @@ class _Owned:
         error = BoolField()
 
         @classmethod
-        def validate(cls, context: ILoadingContext, obj: Any) -> bool:
+        def validate(cls, context: ValidationContext, obj: Any) -> None:
             """Validate."""
             if getattr(obj, 'error', False):
-                context.error(ErrorCode.VALIDATION_ERROR, 'Error')
-                return False
+                context.error('Error')
+                return
             obj.parent_validate_called = True
-            return True
 
         @classmethod
         def post_load(cls, obj: Any) -> None:
@@ -50,10 +49,9 @@ class _OwnedChild(_Owned):
         child_field = StringField()
 
         @classmethod
-        def validate(cls, _: ILoadingContext, obj: Any) -> bool:
+        def validate(cls, _: ValidationContext, obj: Any) -> None:
             """Validate."""
             obj.child_validate_called = True
-            return True
 
         @classmethod
         def post_load(cls, obj: Any) -> None:
@@ -76,10 +74,9 @@ class _Owner:
         field = ObjectField(object_class=_Owned)
 
         @classmethod
-        def validate(cls, __: ILoadingContext, obj: Any) -> bool:
+        def validate(cls, __: ValidationContext, obj: Any) -> None:
             """Validate loaded objects."""
             obj.validate_called = True
-            return True
 
         @classmethod
         def post_load(cls, obj: Any) -> None:
@@ -96,10 +93,9 @@ class _ValidationError:
         """Pofy fields."""
 
         @classmethod
-        def validate(cls, context: ILoadingContext, __: Any) -> bool:
+        def validate(cls, context: ValidationContext, __: Any) -> None:
             """Validate loaded objects."""
-            context.error(ErrorCode.VALIDATION_ERROR, 'Error')
-            return False
+            context.error('Error')
 
 
 class _NoSchema:

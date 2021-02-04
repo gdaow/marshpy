@@ -4,19 +4,19 @@ from typing import Type
 from yaml import Node
 from yaml.error import Mark
 
-from pofy.common import BadTypeFormatError
-from pofy.common import ErrorCode
-from pofy.common import FieldNotDeclaredError
-from pofy.common import ImportNotFoundError
-from pofy.common import MissingRequiredFieldError
-from pofy.common import MultipleMatchingHandlersError
-from pofy.common import PofyError
-from pofy.common import PofyValueError
-from pofy.common import SchemaError
-from pofy.common import TypeResolveError
-from pofy.common import UnexpectedNodeTypeError
-from pofy.common import ValidationError
-from pofy.common import get_exception_type
+from pofy.core.errors import BadTypeFormatError
+from pofy.core.errors import ErrorCode
+from pofy.core.errors import FieldNotDeclaredError
+from pofy.core.errors import ImportNotFoundError
+from pofy.core.errors import MissingRequiredFieldError
+from pofy.core.errors import MultipleMatchingHandlersError
+from pofy.core.errors import PofyError
+from pofy.core.errors import PofyValueError
+from pofy.core.errors import SchemaError
+from pofy.core.errors import TypeResolveError
+from pofy.core.errors import UnexpectedNodeTypeError
+from pofy.core.errors import ValidationError
+from pofy.core.errors import get_exception_type
 
 
 def test_get_exception_type_is_correct() -> None:

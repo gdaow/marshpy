@@ -3,11 +3,11 @@ from gettext import gettext as _
 from typing import Any
 from typing import Optional
 
-from pofy.common import ErrorCode
-from pofy.common import UNDEFINED
+from pofy.core.constants import UNDEFINED
+from pofy.core.errors import ErrorCode
+from pofy.core.interfaces import ILoadingContext
+from pofy.core.validation import ValidateCallback
 from pofy.fields.base_field import ScalarField
-from pofy.fields.base_field import ValidateCallback
-from pofy.interfaces import ILoadingContext
 
 
 class FloatField(ScalarField):

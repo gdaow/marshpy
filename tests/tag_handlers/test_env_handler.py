@@ -1,10 +1,10 @@
-"""Env handler tests."""
+"""Env tag handler tests."""
 from os import environ
 from typing import Any
 from typing import Optional
 
-from pofy.common import ErrorCode
-from pofy.common import UNDEFINED
+from pofy.core.constants import UNDEFINED
+from pofy.core.errors import ErrorCode
 from pofy.fields.string_field import StringField
 from pofy.tag_handlers.env_handler import EnvHandler
 

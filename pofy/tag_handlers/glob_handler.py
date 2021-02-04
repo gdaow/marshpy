@@ -3,9 +3,9 @@ from gettext import gettext as _
 from typing import Any
 from yaml import SequenceNode
 
-from pofy.common import UNDEFINED
-from pofy.interfaces import ILoadingContext
-from pofy.interfaces import IBaseField
+from pofy.core.constants import UNDEFINED
+from pofy.core.interfaces import ILoadingContext
+from pofy.core.interfaces import IBaseField
 from pofy.tag_handlers.path_handler import PathHandler
 
 

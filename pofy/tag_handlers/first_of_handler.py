@@ -2,16 +2,16 @@
 from typing import Any
 from yaml import SequenceNode
 
-from pofy.common import UNDEFINED
-from pofy.interfaces import IBaseField
-from pofy.interfaces import ILoadingContext
+from pofy.core.constants import UNDEFINED
+from pofy.core.interfaces import IBaseField
+from pofy.core.interfaces import ILoadingContext
 from pofy.tag_handlers.tag_handler import TagHandler
 
 
-class SwitchHandler(TagHandler):
+class FirstOfHandler(TagHandler):
     """Tag selecting the first value that is defined in a list."""
 
-    tag_pattern = r'^switch$'
+    tag_pattern = r'^first-of$'
 
     def load(self, context: ILoadingContext, field: IBaseField) \
             -> Any:

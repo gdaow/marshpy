@@ -12,13 +12,14 @@ from typing import Set
 from typing import Type
 from typing import cast
 
-from pofy.common import ErrorCode
-from pofy.common import SchemaResolver
-from pofy.common import UNDEFINED
+from pofy.core.constants import UNDEFINED
+from pofy.core.errors import ErrorCode
+from pofy.core.interfaces import ILoadingContext
+from pofy.core.schema import SchemaResolver
+from pofy.core.validation import ValidateCallback
+from pofy.core.validation import ValidationContext
 from pofy.fields.base_field import BaseField
-from pofy.fields.base_field import ValidateCallback
 from pofy.fields.string_field import StringField
-from pofy.interfaces import ILoadingContext
 
 
 _TYPE_FORMAT_MSG = _("""\
@@ -135,6 +136,7 @@ def _load(object_class: Type[Any], context: ILoadingContext) -> Any:
 
     result, set_fields = _load_object(object_class, fields, context)
     if _validate_object(result, fields, set_fields, context):
+        _post_load(result, context.get_schema_resolver())
         return result
 
     return UNDEFINED
@@ -170,9 +172,6 @@ def _load_object(
 
         setattr(result, field_name, field_value)
 
-    schema_resolver = context.get_schema_resolver()
-    _post_load(result, schema_resolver)
-
     return (result, set_fields)
 
 
@@ -193,9 +192,11 @@ def _validate_object(
             )
 
     schema_resolver = context.get_schema_resolver()
-    for validate in _get_methods(object_class, 'validate', schema_resolver):
-        if not validate(context, obj):
-            valid_object = False
+    for method in _get_methods(object_class, 'validate', schema_resolver):
+        validate = cast(ValidateCallback, method)
+        validation_context = ValidationContext(context)
+        validate(validation_context, obj)
+        valid_object = valid_object or validation_context.has_error()
 
     return valid_object
 
