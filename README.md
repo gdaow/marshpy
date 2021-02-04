@@ -202,6 +202,38 @@ inheritance will already do it :
 
 #### Schema Resolver
 
+The default behavior to resolve schemas for a given type is to search for a
+nested class called 'Schema'. This behavior can be overrided by passing a
+callable to the load function as the 'schema_resolver' parameter. This callable
+will be called with the type to deserialize and should return a schema for this
+type, or None if not was found. This allows to deserialize types without having
+to intrusively declare Schema in it, for example if you want to deserialize
+objects declared in a third-party library. Here is an example of a
+schema_resolver searching in a dictionnary to resolve schemas.
+
+
+```python
+  from pofy import load, StringField
+
+  class Class:
+    pass
+
+  class ClassSchema:
+    color = StringField()
+
+  SCHEMA_MAPPING = {
+    Class: ClassSchema
+  }
+
+  def custom_schema_resolver(type: Type[Any]) -> Type[Any]:
+    return SCHEMA_MAPPING[type]
+
+  ...
+
+  obj = load(Class, schema_resolver=custom_schema_resolver)
+
+```
+
 ### Fields
 
 Pofy comes with predefined fields described below. You can declare custom
