@@ -24,6 +24,7 @@ improvements. Feel free to join [the Pofy channel on Matrix](https://matrix.to/#
     - [Schemas](#schemas)
       - [Object Validation](#object-validation)
       - [Post Load Hook](#post-load-hook)
+      - [SchemaBase](#schemabase)
       - [Schema Resolver](#schema-resolver)
     - [Fields](#fields)
       - [Common Parameters](#common-parameters)
@@ -88,11 +89,12 @@ Schema for a python class is looked up by searching for a nested class named
 
 #### Object Validation
 
-An object of type ValidationContext is passed to the different validation
-methods of Pofy. It provides the following methods :
+When an object is loaded by Pofy, if a 'validate' class method is defined on the
+Schema class, it will be called with a ValidationContext and the deserialized
+object as arguments. The ValidationContext exposes the following methods :
 
 - current_location() : If the current YAML document was loaded from a file,
-  returns the said file, else returns None
+  returns that file path, else returns None
 
 - error(message_format, *args, **kwargs) : Will raise a ValidationError, or
   or the defined [error handler](#error-handling) will be called with
@@ -104,7 +106,99 @@ be raised, terminating the loading at the first call of error(). However, if
 some custom error handling is set up, the execution will continue after the
 first validation error, so be aware of that when writing validation methods.
 
-#### Post Load Hook
+Here is an example of the declaration of a validation method :
+
+```python
+  from pofy import StringField, ValidationContext
+
+  class Test:
+    class Schema:
+      color = StringField()
+
+      def validate(cls, context: ValidationContext, obj: Any):
+        assert isinstance(obj, Test)
+        if obj.color not in ['red', 'green', 'blue']:
+          context.error('Color not allowed')
+
+```
+
+#### Post Load
+
+In the same fashion the [validate](#object-validation) method can be declared,
+a 'post_load' method will be called if it exists on the Schema class upon
+object loading. The only argument will be the deserialized object :
+
+```python
+  from pofy import StringField
+
+  class Test:
+    class Schema:
+      color = StringField()
+
+      def post_load(cls, obj: Any):
+        assert isinstance(obj, Test)
+        obj.color = obj.color.toupper()
+
+```
+
+#### SchemaBase
+
+Pofy provides a SchemaBase class, but it's usage is facultative. It sole purpose
+is to call the [validate](#object-validation) and [post_load](#post-load)
+methods directly on the deserialized object, rather than on the schema class :
+
+```python
+  from pofy import StringField, ValidationContext, SchemaBase
+
+  class Test:
+    class Schema(SchemaBase):
+      color = StringField()
+
+    def validate(self, context: ValidationContext):
+      assert isinstance(obj, Test)
+      if not color in ['red', 'green', 'blue']:
+        context.error('Color not allowed')
+    
+    def post_load(self):
+      assert isinstance(obj, Test)
+      obj.color = obj.color.toupper()
+
+```
+
+Notice that in the case your objects inherits from another deserializable object
+with a Schema inheriting from SchemaBase, you don't have to call
+super().validate(...) and super.post_load(), as the Schema at each level of
+inheritance will already do it :
+
+
+```python
+  from pofy import StringField, ValidationContext, SchemaBase
+
+  class Parent:
+    class Schema(SchemaBase):
+      color = StringField()
+
+    def validate(self, context: ValidationContext):
+      ...
+    
+    def post_load(self):
+      ...
+
+  class Child:
+    class Schema(SchemaBase):
+      child_color = StringField()
+
+    def validate(self, context: ValidationContext):
+      # don't call super().validate(context) here, it will already be called by 
+      # Parent.Schema
+      ...
+    
+    def post_load(self):
+      # don't call super().post_load() here, it will already be called by 
+      # Parent.Schema
+      ...
+
+```
 
 #### Schema Resolver
 
