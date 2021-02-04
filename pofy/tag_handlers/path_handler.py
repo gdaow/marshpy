@@ -33,7 +33,7 @@ class PathHandler(TagHandler):
         """Initialize the PathHandler.
 
         Args:
-            roots: Roots paths to use when resolving files.
+            roots:          Roots paths to use when resolving files.
             allow_relative: If set to True, the handler will try to load files
                             relative to the current YAML file, if applicable.
 

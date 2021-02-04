@@ -649,16 +649,142 @@ ErrorCode.UNEXPECTED_NODE_TYPE as the error_code parameter.
 
 #### glob
 
+The glob tag can be set on a YAML string value, and will load all the YAML
+documents that matches the tagged pattern as a YAML list. The pattern is
+relatively to all configured roots (see below), and the current YAML document
+directory, if the YAML is loaded from a file. The Pofy load method accepts a
+'resolve_roots' arguments, as a list of path that glob and [import](#import)
+tags should use as root when searching for files.
+
+If this tag is set on another value than a YAML scalar value, an
+UnexpectedNodeTypeError will be raised, or the defined
+[error handler](#error-handling) will be called with
+ErrorCode.UNEXPECTED_NODE_TYPE as the error_code parameter.
+
+```python
+
+  from pofy import StringField, ListField, ObjectField, load
+
+  class Child:
+    class Schema:
+      color = StringField()
+
+  class Parent:
+    class Schema:
+      children = ListField(
+        ObjectField(Child)
+      )
+
+  # /root/parent.yaml
+  # > children: !glob *_child.yaml
+
+  # /root/child_1.yaml
+  # > color: red
+
+  # /include/child_2.yaml
+  # > color: green
+
+  test = load('parent.yaml', Test, resolve_roots=['/include'])
+
+  assert isinstance(test.children[0], Child)
+  assert isinstance(test.children[1], Child)
+  assert test.children[0].color == 'red'
+  assert test.children[1].color == 'green'
+
+```
+
 #### if
+
+The 'if' tag can be set on any YAML value, and will load the tagged node only
+if the given flag was defined, through the 'flags' parameter of the Pofy load
+method. If the flag is not defined, the field will not be set at all. This tag
+is usefull in conjonction with the [first-of](#first-of) tag.
+
+```python
+
+  from pofy import StringField
+
+  class Test:
+    class Schema:
+      color = StringField()
+
+  test = load('color: !if(SET_FLAG) red', Test, flags={'SET_FLAG'})
+  assert test.color == 'red'
+
+  test = load('color: !if(UNSET_FLAG) red', Test, flags={'SET_FLAG'})
+  assert not hasattr(test, 'color')
+
+```
 
 #### import / try-import
 
+The import and try-import tags can be set on a YAML string value, and will load
+the given YAML document as the field value. The file path is evaluated
+relatively to all configured roots (see below), and the current YAML document
+directory, if the YAML is loaded from a file. The Pofy load method accepts a
+'resolve_roots' arguments, as a list of path that import and [glob](#glob)
+tags use as root when searching for files. If a file matching the given path
+cannot be found relatively (if the pass is relative) to the current YAML
+directory, or any of the resolve_roots items, import will raise a
+ImportNotFoundError, or the defined [error handler](#error-handling) will be
+called with ErrorCode.IMPORT_NOT_FOUND as the error_code parameter. Try import
+will not load any value, but will not raise any error.
+
+If this tag is set on another value than a YAML scalar value, an
+UnexpectedNodeTypeError will be raised, or the defined
+[error handler](#error-handling) will be called with
+ErrorCode.UNEXPECTED_NODE_TYPE as the error_code parameter.
+
+```python
+
+  from pofy import StringField, ListField, ObjectField, load
+
+  class Child:
+    class Schema:
+      color = StringField()
+
+  class Parent:
+    class Schema:
+      child = ObjectField(Child)
+
+  # /root/parent.yaml
+  # > children: !import child.yaml
+
+  # /root/child.yaml
+  # > color: red
+
+  test = load('parent.yaml', Test)
+
+  assert isinstance(test.child, Child)
+  assert test.child.color == 'red'
+
+```
+
 #### merge
 
-The import and try import tags allows to import another YAML file as a field of
-the currently deserialized object :
+The merge tag can be set on a YAML list value, and will merge return the merge
+of all the item in the list, as a dictionnary or list.
 
-#### Custom tag handlers
+```python
+
+  from pofy import StringField, ListField, load
+
+  class Parent:
+    class Schema:
+      colors = ListField(StringField())
+
+  test = load(
+    'colors:',
+    ' - { 'blue', 'green' }
+    ' - { 'red', 'green' }',
+    Test
+  )
+
+  assert test.colors = ['blue', 'green', 'red', 'green']
+
+```
+
+#### Custom Tag Handlers
 
 Pofy allows you to plug custom deserialization behavior when encountering some
 YAML tags, matching a given regular expression. These custom behaviors are
@@ -711,6 +837,42 @@ Before using it in YAML, the handler should be registered when calling the pofy
 
 ### Custom Error Handling
 
-### Creating Custom Fields
+By default, Pofy will raise an exception when an error is encountered. This
+behavior can be overrided by passing a callable as the 'error _handler'
+parameter of the load(...) function. this callable should accept a
+Pofy.ErrorCode and a string giving more information on the error. The error_code
+parameter can be one of the following ErrorCode enum values :
 
-A field should always return object of the same type (MergeHandler expects this)
+ - BAD_TYPE_TAG_FORMAT :        A malformed [!type tag](#object-field) was
+                                encountered.
+
+ - FIELD_NOT_DECLARED :         An unknown field was encountered in YAML
+
+ - MISSING_REQUIRED_FIELD :     A required field was not set in YAML
+
+ - UNEXPECTED_NODE_TYPE :       An unexpected type of node was encountered (for
+                                example, a list when loading a string field, or
+                                a scalar after a !merge tag).
+
+ - IMPORT_NOT_FOUND:            An [!import tag](#import-try--import) couldn't
+                                find the given file.
+
+ - TYPE_RESOLVE_ERROR :         Couldn't find the type given by a
+                                [!type tag](#object-field)
+
+ - VALUE_ERROR :                A value couldn't be parsed (for example, bad
+                                integer format)
+
+ - VALIDATION_ERROR :           Validation failed (either from built-in features
+                                like the [pattern parameter of
+                                [StringField](#string-field), or from custom
+                                [validation callbacks](#object-validation)
+
+ - MULTIPLE_MATCHING_HANDLERS : The [tag handler](#custom-tag-handler) to choose
+                                for a tag is ambiguous. This is raised at
+                                parsing time, not when registering handlers, as
+                                tag handlers are matched with regular
+                                expressions.
+
+ - SCHEMA_ERROR = 10 :          A schema for a type couldn't be found.
+
