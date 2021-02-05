@@ -8,25 +8,24 @@ from tests.helpers import check_field
 from tests.helpers import check_field_error
 
 
-class _BoolObject:
+class _Test:
     """Test class for bool field tests."""
 
-    class Schema:
-        """Pofy fields."""
-
-        field = BoolField()
+    fields = {
+        'bool': BoolField()
+    }
 
     def __init__(self) -> None:
         """Initialize _BoolObject."""
-        self.field: Optional[bool] = None
+        self.bool: Optional[bool] = None
 
 
 def _check_field(yaml_value: str, expected_value: bool) -> None:
-    check_field(_BoolObject, 'field', yaml_value, expected_value)
+    check_field(_Test, 'bool', yaml_value, expected_value)
 
 
 def _check_field_error(yaml_value: str, expected_error: ErrorCode) -> None:
-    check_field_error(_BoolObject, 'field', yaml_value, expected_error)
+    check_field_error(_Test, 'bool', yaml_value, expected_error)
 
 
 def test_bool_field() -> None:

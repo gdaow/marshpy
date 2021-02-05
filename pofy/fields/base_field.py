@@ -36,7 +36,7 @@ class BaseField(IBaseField):
         """
         if validate is not None:
             assert callable(validate), _('validate must be a callable object.')
-        self.required = required
+        self._required = required
         self._validate = validate
 
     def load(self, context: ILoadingContext) -> Any:
@@ -61,6 +61,10 @@ class BaseField(IBaseField):
                 return UNDEFINED
 
         return field_value
+
+    @property
+    def required(self) -> bool:
+        return self._required
 
     @abstractmethod
     def _load(self, context: ILoadingContext) -> Any:

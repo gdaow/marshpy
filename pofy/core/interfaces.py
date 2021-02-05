@@ -1,11 +1,13 @@
 """Pofy common definitions."""
 from abc import abstractmethod
 from typing import Any
+from typing import Callable
+from typing import Dict
 from typing import Optional
+from typing import Type
 
 from yaml import Node
 
-from pofy.core.constants import SchemaResolver
 from pofy.core.errors import ErrorCode
 
 
@@ -25,6 +27,11 @@ class IBaseField:
             Deserialized field value, or UNDEFINED if loading failed.
 
         """
+
+    @property
+    @abstractmethod
+    def required(self) -> bool:
+        """Return true if this field must be defined."""
 
 
 class ILoadingContext:
@@ -56,8 +63,12 @@ class ILoadingContext:
         """Return true if the given flag was defined when calling load."""
 
     @abstractmethod
-    def get_schema_resolver(self) -> SchemaResolver:
-        """Return a function returning the schema for the given type."""
+    def get_fields(self, cls: Type[Any]) -> Dict[str, IBaseField]:
+        """Get the fields for the given type."""
+
+    @abstractmethod
+    def get_hook(self, obj: Any, name: str) -> Optional[Callable[..., None]]:
+        """Get the hook with the given name for the given object."""
 
     @abstractmethod
     def current_node(self) -> Node:

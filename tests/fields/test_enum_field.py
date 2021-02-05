@@ -14,20 +14,18 @@ class _TestEnum(Enum):
     THIRD = 30
 
 
-class _EnumObject:
-
-    class Schema:
-        """Pofy fields."""
-
-        field = EnumField(enum_class=_TestEnum)
+class _Test:
+    fields = {
+        'enum': EnumField(enum_class=_TestEnum)
+    }
 
 
 def _check_field(yml_value: str, expected_value: _TestEnum) -> None:
-    check_field(_EnumObject, 'field', yml_value, expected_value)
+    check_field(_Test, 'enum', yml_value, expected_value)
 
 
 def _check_field_error(yml_value: str, expected_error: ErrorCode) -> None:
-    check_field_error(_EnumObject, 'field', yml_value, expected_error)
+    check_field_error(_Test, 'enum', yml_value, expected_error)
 
 
 def test_enum_field() -> None:

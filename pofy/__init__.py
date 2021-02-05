@@ -1,7 +1,6 @@
 """YAML python object deserializer."""
 
 from .core.constants import UNDEFINED
-from .core.constants import SchemaResolver
 from .core.errors import BadTypeFormatError
 from .core.errors import ErrorCode
 from .core.errors import ErrorHandler
@@ -17,7 +16,6 @@ from .core.errors import UnexpectedNodeTypeError
 from .core.errors import ValidationError
 from .core.errors import get_exception_type
 from .core.loading_context import LoadingContext
-from .core.schema import SchemaBase
 
 from .fields.base_field import BaseField
 from .fields.bool_field import BoolField

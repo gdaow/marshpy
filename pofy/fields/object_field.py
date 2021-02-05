@@ -1,12 +1,8 @@
 """Object field class & utilities."""
 from gettext import gettext as _
-from inspect import getmembers
 from inspect import isclass
-from inspect import ismethod
 from typing import Any
-from typing import Callable
 from typing import Dict
-from typing import Iterable
 from typing import Optional
 from typing import Set
 from typing import Type
@@ -14,8 +10,8 @@ from typing import cast
 
 from pofy.core.constants import UNDEFINED
 from pofy.core.errors import ErrorCode
+from pofy.core.interfaces import IBaseField
 from pofy.core.interfaces import ILoadingContext
-from pofy.core.schema import SchemaResolver
 from pofy.core.validation import ValidateCallback
 from pofy.core.validation import ValidationContext
 from pofy.fields.base_field import BaseField
@@ -131,12 +127,18 @@ def _get_type(
 def _load(object_class: Type[Any], context: ILoadingContext) -> Any:
     fields = _get_fields(object_class, context)
 
-    if fields is None:
+    if len(fields) == 0:
+        context.error(
+            ErrorCode.SCHEMA_ERROR,
+            _('No Schema class found for type {}, check that your schema is '
+              'correctly configured.'),
+            object_class.__name__
+        )
         return UNDEFINED
 
     result, set_fields = _load_object(object_class, fields, context)
     if _validate_object(result, fields, set_fields, context):
-        _post_load(result, context.get_schema_resolver())
+        _post_load(result, context)
         return result
 
     return UNDEFINED
@@ -144,7 +146,7 @@ def _load(object_class: Type[Any], context: ILoadingContext) -> Any:
 
 def _load_object(
     object_class: Type[Any],
-    fields: Dict[str, BaseField],
+    fields: Dict[str, IBaseField],
     context: ILoadingContext
 ) -> Any:
     node = context.current_node()
@@ -177,11 +179,10 @@ def _load_object(
 
 def _validate_object(
     obj: Any,
-    fields: Dict[str, BaseField],
+    fields: Dict[str, IBaseField],
     set_fields: Set[str],
     context: ILoadingContext
 ) -> bool:
-    object_class = obj.__class__
     valid_object = True
     for name, field in fields.items():
         if field.required and name not in set_fields:
@@ -191,78 +192,31 @@ def _validate_object(
                 _('Missing required field {}'), name
             )
 
-    schema_resolver = context.get_schema_resolver()
-    for method in _get_methods(object_class, 'validate', schema_resolver):
-        validate = cast(ValidateCallback, method)
+    hook = context.get_hook(obj, 'validate')
+
+    if hook is not None:
         validation_context = ValidationContext(context)
-        validate(validation_context, obj)
-        valid_object = valid_object or validation_context.has_error()
+        hook(validation_context)
+        valid_object = valid_object and not validation_context.has_error()
 
     return valid_object
 
 
-def _post_load(obj: Any, schema_resolver: SchemaResolver) -> Any:
-    object_class = obj.__class__
-    for post_load_method in _get_methods(
-        object_class,
-        'post_load',
-        schema_resolver
-    ):
-        post_load_method(obj)
+def _post_load(obj: Any, context: ILoadingContext) -> Any:
+    hook = context.get_hook(obj, 'post_load')
 
-
-def _is_field(member: Any) -> bool:
-    return isinstance(member, BaseField)
-
-
-def _get_schema_classes(
-    cls: Type[Any],
-    schema_resolver: SchemaResolver
-) -> Iterable[Type[Any]]:
-    for base in cls.__bases__:
-        for schema_class in _get_schema_classes(base, schema_resolver):
-            yield schema_class
-
-    schema = schema_resolver(cls)
-    if schema is not None:
-        yield schema
+    if hook is not None:
+        hook()
 
 
 def _get_fields(cls: Type[Any], context: ILoadingContext) \
-        -> Optional[Dict[str, BaseField]]:
-    schema_resolver = context.get_schema_resolver()
-    schema_classes = list(_get_schema_classes(cls, schema_resolver))
-
-    if len(schema_classes) == 0:
-        context.error(
-            ErrorCode.SCHEMA_ERROR,
-            _('No Schema class found for type {}, check that your schema is '
-              'correctly configured.'),
-            cls.__name__
-        )
-        return None
-
+        -> Dict[str, IBaseField]:
     fields = {}
-    for schema_it in schema_classes:
-        for name, field in getmembers(schema_it, _is_field):
-            fields[name] = field
+
+    for parent in cls.__bases__:
+        parent_fields = _get_fields(parent, context)
+        fields.update(parent_fields)
+
+    fields.update(context.get_fields(cls))
 
     return fields
-
-
-def _get_methods(
-    cls: Type[Any],
-    method_name: str,
-    schema_resolver: SchemaResolver
-) \
-        -> Iterable[Callable[..., Any]]:
-    def _method_filter(member: Any) -> bool:
-        return ismethod(member) and member.__name__ == method_name
-
-    for base in cls.__bases__:
-        for method in _get_methods(base, method_name, schema_resolver):
-            yield method
-
-    schema_class = schema_resolver(cls)
-    for __, method in getmembers(schema_class, _method_filter):
-        yield method

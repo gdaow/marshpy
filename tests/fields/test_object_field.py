@@ -15,24 +15,10 @@ from tests.helpers import check_load
 
 class _Owned:
 
-    class Schema:
-        """Pofy fields."""
-
-        required_field = StringField(required=True)
-        error = BoolField()
-
-        @classmethod
-        def validate(cls, context: ValidationContext, obj: Any) -> None:
-            """Validate."""
-            if getattr(obj, 'error', False):
-                context.error('Error')
-                return
-            obj.parent_validate_called = True
-
-        @classmethod
-        def post_load(cls, obj: Any) -> None:
-            """Postload."""
-            obj.parent_post_load_called = True
+    fields = {
+        'required_field': StringField(required=True),
+        'error': BoolField()
+    }
 
     def __init__(self) -> None:
         """Initialize object."""
@@ -40,23 +26,23 @@ class _Owned:
         self.parent_validate_called = False
         self.parent_post_load_called = False
 
+    def validate(self, context: ValidationContext) -> None:
+        """Validate."""
+        if getattr(self, 'error', False):
+            context.error('Error')
+            return
+        self.parent_validate_called = True
+
+    def post_load(self) -> None:
+        """Postload."""
+        self.parent_post_load_called = True
+
 
 class _OwnedChild(_Owned):
 
-    class Schema:
-        """Pofy fields."""
-
-        child_field = StringField()
-
-        @classmethod
-        def validate(cls, _: ValidationContext, obj: Any) -> None:
-            """Validate."""
-            obj.child_validate_called = True
-
-        @classmethod
-        def post_load(cls, obj: Any) -> None:
-            """Postload."""
-            obj.child_post_load_called = True
+    fields = {
+        'child_field': StringField()
+    }
 
     def __init__(self) -> None:
         """Initialize object."""
@@ -65,48 +51,54 @@ class _OwnedChild(_Owned):
         self.child_validate_called = False
         self.child_post_load_called = False
 
+    def validate(self, context: ValidationContext) -> None:
+        """Validate."""
+        super().validate(context)
+        self.child_validate_called = True
+
+    def post_load(self) -> None:
+        """Postload."""
+        super().post_load()
+        self.child_post_load_called = True
+
 
 class _Owner:
 
-    class Schema:
-        """Pofy fields."""
-
-        field = ObjectField(object_class=_Owned)
-
-        @classmethod
-        def validate(cls, __: ValidationContext, obj: Any) -> None:
-            """Validate loaded objects."""
-            obj.validate_called = True
-
-        @classmethod
-        def post_load(cls, obj: Any) -> None:
-            """Post load."""
-            obj.post_load_called = True
+    fields = {
+        'field': ObjectField(object_class=_Owned)
+    }
 
     def __init__(self) -> None:
         """Initialize _Owner."""
         self.field: Optional[_Owned] = None
+        self.post_load_called = False
+        self.validate_called = False
+
+    def validate(self, __: ValidationContext) -> None:
+        """Validate loaded objects."""
+        self.validate_called = True
+
+    def post_load(self) -> None:
+        """Post load."""
+        self.post_load_called = True
 
 
 class _ValidationError:
-    class Schema:
-        """Pofy fields."""
 
-        @classmethod
-        def validate(cls, context: ValidationContext, __: Any) -> None:
-            """Validate loaded objects."""
-            context.error('Error')
+    @classmethod
+    def validate(cls, _: Any, context: ValidationContext, __: Any) -> None:
+        """Validate loaded objects."""
+        context.error('Error')
 
 
-class _NoSchema:
+class _NoFields:
     pass
 
 
 class _Simple:
-    class Schema:
-        """Pofy fields."""
-
-        field = StringField()
+    fields = {
+        'field': StringField()
+    }
 
 
 def _check_field_error(yaml_value: str, expected_error: ErrorCode) -> None:
@@ -167,5 +159,5 @@ def test_object_field_error_handling() -> None:
 
     _check_field_error('{ }', ErrorCode.MISSING_REQUIRED_FIELD)
 
-    obj = check_load('{ }', _NoSchema, ErrorCode.SCHEMA_ERROR)
+    obj = check_load('{ }', _NoFields, ErrorCode.SCHEMA_ERROR)
     assert obj == UNDEFINED

@@ -10,24 +10,23 @@ from tests.helpers import check_field
 from tests.helpers import check_field_error
 
 
-class _ListObject:
+class _Test:
 
-    class Schema:
-        """Pofy fields."""
-
-        field = ListField(StringField())
+    fields = {
+        'list': ListField(StringField())
+    }
 
     def __init__(self) -> None:
-        """Initialize _ListObject."""
+        """Initialize _Test."""
         self.field: Optional[List[str]] = None
 
 
 def _check_field(yaml_value: str, expected_value: List[str]) -> None:
-    check_field(_ListObject, 'field', yaml_value, expected_value)
+    check_field(_Test, 'list', yaml_value, expected_value)
 
 
 def _check_field_error(yaml_value: str, expected_error: ErrorCode) -> None:
-    check_field_error(_ListObject, 'field', yaml_value, expected_error)
+    check_field_error(_Test, 'list', yaml_value, expected_error)
 
 
 def test_list_field() -> None:

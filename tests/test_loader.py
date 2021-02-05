@@ -2,6 +2,7 @@
 from io import StringIO
 from pathlib import Path
 from typing import Any
+from typing import Dict
 from typing import Optional
 from typing import Type
 
@@ -9,6 +10,7 @@ from yaml import Node
 
 from pofy.core.constants import UNDEFINED
 from pofy.core.errors import ErrorCode
+from pofy.core.interfaces import IBaseField
 from pofy.core.interfaces import ILoadingContext
 from pofy.fields.list_field import ListField
 from pofy.fields.object_field import ObjectField
@@ -21,21 +23,19 @@ from tests.helpers import FailTagHandler
 def test_resolve_root_works(datadir: Path) -> None:
     """Resolve root should be forwarded to glob and import tag handler."""
     class _Owned:
-        class Schema:
-            """Pyfo fields."""
-
-            test_field = StringField()
+        fields = {
+            'test_field': StringField()
+        }
 
         test_field: Optional[str] = None
 
     class _Owner:
-        class Schema:
-            """Pyfo fields."""
-
-            object_field = ObjectField(object_class=_Owned)
-            object_list = ListField(
+        fields = {
+            'object_field': ObjectField(object_class=_Owned),
+            'object_list': ListField(
                 ObjectField(object_class=_Owned)
             )
+        }
 
         def __init__(self) -> None:
             self.object_field = None
@@ -112,18 +112,18 @@ def test_load_defines_node_path(datadir: Path) -> None:
     validate_called = False
 
     class _TestObject:
-        class Schema:
-            """Pyfo fields."""
 
-            test_field = StringField()
+        fields = {
+            'test_field': StringField()
+        }
 
-            @classmethod
-            def validate(cls: Type[Any], context: ILoadingContext, __: Any) \
-                    -> None:
-                """Validate that context as correct current_node_path."""
-                nonlocal validate_called
-                validate_called = True
-                assert context.current_location() == str(file_path)
+        @classmethod
+        def validate(cls, _: Any, context: ILoadingContext) \
+                -> None:
+            """Validate that context as correct current_node_path."""
+            nonlocal validate_called
+            validate_called = True
+            assert context.current_location() == str(file_path)
 
     with open(file_path) as yaml_file:
         load(yaml_file, _TestObject)
@@ -146,24 +146,21 @@ def test_schema_resolver_is_called() -> None:
     """The given schema_resolver should be called when defined."""
     resolver_called = False
 
-    class _Schema:
-        string_field = StringField()
-
     class _Object:
         def __init__(self) -> None:
             self.string_field = 'default value'
 
-    def _schema_resolver(cls: Type[Any]) -> Optional[Type[Any]]:
+    def _field_resolver(cls: Type[Any]) -> Dict[str, IBaseField]:
         nonlocal resolver_called
         if cls == _Object:
             resolver_called = True
-            return _Schema
-        return None
+            return dict(string_field=StringField())
+        return {}
 
     result = load(
         'string_field: value',
         object_class=_Object,
-        schema_resolver=_schema_resolver
+        field_resolver=_field_resolver
     )
 
     assert resolver_called

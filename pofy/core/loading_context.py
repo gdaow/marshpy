@@ -2,27 +2,30 @@
 from gettext import gettext as _
 from typing import Any
 from typing import Callable
+from typing import Dict
 from typing import Iterable
 from typing import List
 from typing import Optional
 from typing import Set
 from typing import Tuple
 from typing import Type
+from typing import cast
 
 from yaml import MappingNode
 from yaml import Node
 from yaml import ScalarNode
 from yaml import SequenceNode
 
-from pofy.core.constants import SchemaResolver
 from pofy.core.errors import ErrorCode
 from pofy.core.errors import get_exception_type
 from pofy.core.interfaces import IBaseField
 from pofy.core.interfaces import ILoadingContext
-from pofy.core.schema import default_schema_resolver
 from pofy.tag_handlers.tag_handler import TagHandler
 
+
 ErrorHandler = Optional[Callable[[Node, ErrorCode, str], Any]]
+FieldResolver = Callable[[Type[Any]], Dict[str, 'IBaseField']]
+HookResolver = Callable[[Any, str], Optional[Callable[..., None]]]
 NodeStack = List[Tuple[Node, Optional[str]]]
 
 
@@ -34,17 +37,23 @@ class LoadingContext(ILoadingContext):
         error_handler: ErrorHandler,
         tag_handlers: Iterable[TagHandler],
         flags: Optional[Set[str]] = None,
-        schema_resolver: Optional[SchemaResolver] = None
+        field_resolver: Optional[FieldResolver] = None,
+        hook_resolver: Optional[HookResolver] = None
     ):
         """Initialize context."""
         self._error_handler = error_handler
         self._tag_handlers = list(tag_handlers)
         self._node_stack: NodeStack = []
         self._flags = flags if flags is not None else set()
-        if schema_resolver is not None:
-            self._schema_resolver = schema_resolver
+        if field_resolver is not None:
+            self._field_resolver = field_resolver
         else:
-            self._schema_resolver = default_schema_resolver
+            self._field_resolver = _default_field_resolver
+
+        if hook_resolver is not None:
+            self._hook_resolver = hook_resolver
+        else:
+            self._hook_resolver = _default_hook_resolver
 
     def load(
         self,
@@ -84,8 +93,11 @@ class LoadingContext(ILoadingContext):
     def is_defined(self, flag: str) -> bool:
         return flag in self._flags
 
-    def get_schema_resolver(self) -> SchemaResolver:
-        return self._schema_resolver
+    def get_fields(self, cls: Type[Any]) -> Dict[str, IBaseField]:
+        return self._field_resolver(cls)
+
+    def get_hook(self, obj: Any, name: str) -> Optional[Callable[..., None]]:
+        return self._hook_resolver(obj, name)
 
     def current_node(self) -> Node:
         """Return the currently loaded node."""
@@ -193,3 +205,24 @@ class LoadingContext(ILoadingContext):
             found_handler = handler
 
         return found_handler
+
+
+def _default_field_resolver(cls: Type[Any]) -> Dict[str, IBaseField]:
+    if not hasattr(cls, 'fields'):
+        return {}
+
+    schema = getattr(cls, 'fields')
+    return cast(Dict[str, IBaseField], schema)
+
+
+def _default_hook_resolver(obj: Any, hook_name: str)\
+        -> Optional[Callable[..., None]]:
+    if not hasattr(obj, hook_name):
+        return None
+
+    hook = getattr(obj, hook_name)
+
+    if not callable(hook):
+        return None
+
+    return cast(Callable[..., Any], hook)

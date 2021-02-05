@@ -12,16 +12,14 @@ def test_field_validation() -> None:
         assert isinstance(context, ValidationContext)
         context.error('Test')
 
-    class _ValidateFieldObject:
-
-        class Schema:
-            """Pofy fields."""
-
-            validated_field = StringField(validate=_validate)
+    class _Test:
+        fields = {
+            'field': StringField(validate=_validate)
+        }
 
     check_field_error(
-        _ValidateFieldObject,
-        'validated_field',
+        _Test,
+        'field',
         'value',
         ErrorCode.VALIDATION_ERROR
     )

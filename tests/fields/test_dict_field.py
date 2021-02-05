@@ -10,23 +10,22 @@ from tests.helpers import check_field
 from tests.helpers import check_field_error
 
 
-class _DictObject:
-    class Schema:
-        """Pofy fields."""
-
-        field = DictField(StringField())
+class _Test:
+    fields = {
+        'dict': DictField(StringField())
+    }
 
     def __init__(self) -> None:
-        """Initialize _DictObject."""
-        self.field: Optional[Dict[str, str]] = None
+        """Initialize _Test."""
+        self.dict: Optional[Dict[str, str]] = None
 
 
 def _check_field(yaml_value: str, expected_value: Dict[str, str]) -> None:
-    check_field(_DictObject, 'field', yaml_value, expected_value)
+    check_field(_Test, 'dict', yaml_value, expected_value)
 
 
 def _check_field_error(yaml_value: str, expected_error: ErrorCode) -> None:
-    check_field_error(_DictObject, 'field', yaml_value, expected_error)
+    check_field_error(_Test, 'dict', yaml_value, expected_error)
 
 
 def test_dict_field() -> None:

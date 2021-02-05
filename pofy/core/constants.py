@@ -1,8 +1,4 @@
 """Pofy common definitions."""
-from typing import Any
-from typing import Callable
-from typing import Optional
-from typing import Type
 from typing import TypeVar
 from typing import Union
 
@@ -17,5 +13,3 @@ UNDEFINED = Undefined()
 
 ObjectType = TypeVar('ObjectType')
 LoadResult = Union[ObjectType, Undefined]
-
-SchemaResolver = Callable[[Type[Any]], Optional[Type[Any]]]

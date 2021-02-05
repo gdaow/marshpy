@@ -18,8 +18,9 @@ from yaml import compose
 from pofy.core.constants import LoadResult
 from pofy.core.constants import UNDEFINED
 from pofy.core.errors import ErrorHandler
+from pofy.core.loading_context import FieldResolver
+from pofy.core.loading_context import HookResolver
 from pofy.core.loading_context import LoadingContext
-from pofy.core.schema import SchemaResolver
 from pofy.fields.base_field import BaseField
 from pofy.fields.bool_field import BoolField
 from pofy.fields.dict_field import DictField
@@ -54,7 +55,8 @@ def load(
     error_handler: Optional[ErrorHandler] = None,
     root_field: Optional[BaseField] = None,
     flags: Optional[Set[str]] = None,
-    schema_resolver: Optional[SchemaResolver] = None
+    field_resolver: Optional[FieldResolver] = None,
+    hook_resolver: Optional[HookResolver] = None
 ) -> LoadResult[ObjectType]:
     """Deserialize a YAML document into an object.
 
@@ -76,10 +78,14 @@ def load(
         flags:              Flags to define during loading. Those can be used
                             during deserialization to customize the loaded
                             objects.
-        schema_resolver:    Function returning the schema definition for the
+        field_resolver:     Function returning the fields definition for the
                             given type, or None if not found. By default, it
-                            will search for a nested class named 'Schema' in
+                            will search for a class variable named 'fields' in
                             the deserialized type.
+        hook_resolver:      Function returning the hook with the given name for
+                            the given object, or None if not found. By default,
+                            it will search for an instance method named like the
+                            hook on the given object.
 
     """
     assert isinstance(source, (str, TextIOBase)), \
@@ -106,7 +112,8 @@ def load(
         error_handler=error_handler,
         tag_handlers=all_tag_handlers,
         flags=flags,
-        schema_resolver=schema_resolver
+        field_resolver=field_resolver,
+        hook_resolver=hook_resolver
     )
 
     assert isclass(object_class), _('object_class must be a type')

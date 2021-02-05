@@ -6,20 +6,19 @@ from tests.helpers import check_field
 from tests.helpers import check_field_error
 
 
-class _FloatObject:
+class _Test:
 
-    class Schema:
-        """Pofy fields."""
-
-        field = FloatField(minimum=10.0, maximum=20.0)
+    fields = {
+        'float': FloatField(minimum=10.0, maximum=20.0)
+    }
 
 
 def _check_field(yml_value: str, expected_value: float) -> None:
-    check_field(_FloatObject, 'field', yml_value, expected_value)
+    check_field(_Test, 'float', yml_value, expected_value)
 
 
 def _check_field_error(yml_value: str, expected_error: ErrorCode) -> None:
-    check_field_error(_FloatObject, 'field', yml_value, expected_error)
+    check_field_error(_Test, 'float', yml_value, expected_error)
 
 
 def test_float_field() -> None:

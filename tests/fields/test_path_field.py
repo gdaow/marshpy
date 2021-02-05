@@ -9,21 +9,20 @@ from tests.helpers import check_field_error
 from tests.helpers import check_load
 
 
-class _PathObject:
+class _Test:
 
-    class Schema:
-        """Pofy fields."""
-
-        field = PathField()
-        not_checked = PathField(must_exist=False)
+    fields ={
+        'path': PathField(),
+        'path_not_checked': PathField(must_exist=False)
+    }
 
 
 def _check_field(yaml_value: str, expected_value: Path) -> None:
-    check_field(_PathObject, 'field', yaml_value, expected_value)
+    check_field(_Test, 'path', yaml_value, expected_value)
 
 
 def _check_field_error(yaml_value: str, expected_error: ErrorCode) -> None:
-    check_field_error(_PathObject, 'field', yaml_value, expected_error)
+    check_field_error(_Test, 'path', yaml_value, expected_error)
 
 
 def test_path_field(datadir: Path) -> None:
@@ -35,11 +34,11 @@ def test_path_field(datadir: Path) -> None:
     # Relative path
     file_path = datadir / 'file.yaml'
     with open(file_path, 'r') as yaml_file:
-        result = check_load(yaml_file, _PathObject, location=str(file_path))
-        assert result.field == datadir / 'some_file.txt'
+        result = check_load(yaml_file, _Test, location=str(file_path))
+        assert result.path == datadir / 'some_file.txt'
 
-    result = check_load('not_checked: doesnt_exists.txt', _PathObject)
-    assert result.not_checked == Path('doesnt_exists.txt')
+    result = check_load('path_not_checked: doesnt_exists.txt', _Test)
+    assert result.path_not_checked == Path('doesnt_exists.txt')
 
 
 def test_path_field_error_handling() -> None:
