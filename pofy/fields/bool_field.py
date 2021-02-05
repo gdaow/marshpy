@@ -8,32 +8,33 @@ from pofy.core.interfaces import ILoadingContext
 from pofy.fields.scalar_field import ScalarField
 
 
+_TRUE_VALUES = [
+    'y', 'Y', 'yes', 'Yes', 'YES',
+    'true', 'True', 'TRUE',
+    'on', 'On', 'ON'
+]
+
+_FALSE_VALUES = [
+    'n', 'N', 'no', 'No', 'NO',
+    'false', 'False', 'FALSE'
+    'off', 'Off', 'OFF'
+]
+
+
 class BoolField(ScalarField):
     """Boolean field loader."""
 
     def _convert(self, context: ILoadingContext, value: str) -> Any:
-        true_values = [
-            'y', 'Y', 'yes', 'Yes', 'YES',
-            'true', 'True', 'TRUE',
-            'on', 'On', 'ON'
-        ]
-
-        false_values = [
-            'n', 'N', 'no', 'No', 'NO',
-            'false', 'False', 'FALSE'
-            'off', 'Off', 'OFF'
-        ]
-
-        if value in true_values:
+        if value in _TRUE_VALUES:
             return True
 
-        if value in false_values:
+        if value in _FALSE_VALUES:
             return False
 
         context.error(
             ErrorCode.VALUE_ERROR,
             _('Boolean value should be one of {}'),
-            ', '.join(true_values + false_values)
+            ', '.join(_TRUE_VALUES + _FALSE_VALUES)
         )
 
         return UNDEFINED
