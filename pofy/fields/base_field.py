@@ -14,7 +14,7 @@ from pofy.core.validation import ValidationContext
 
 
 class BaseField(IBaseField):
-    """Base class for YAML object fields."""
+    """Base class for all Pofy fields."""
 
     def __init__(
         self,
@@ -24,13 +24,15 @@ class BaseField(IBaseField):
         """Initialize the field.
 
         Args:
-            required: If it's true and the field is not defined in yaml, it
-                      will create an error that will eventually be raised at
-                      the end of deserialization.
-            validate: Function accepting a Node, ILoadingContext and the
-                      deserialized field value, that should return True if the
-                      value is valid, false otherwise, and call context.error
-                      to report errors, eventually using the
+            required: If set te true and this field is not defined in yaml when
+                      the owning object is loaded, a MissingFieldError error
+                      will be raised, or the custom error handler will be
+                      called with ErrorCode.MISSING_FIELD_ERROR.
+            validate: Function accepting a ValidationContext and the field
+                      value as arguments. If the value is invalid,
+                      ValidationContext.error should be called with an
+                      explicative message, which will raise a ValidationError
+                      error, or call the custom error_handler with
                       ErrorCode.VALIDATION_ERROR code.
 
         """
@@ -40,15 +42,14 @@ class BaseField(IBaseField):
         self._validate = validate
 
     def load(self, context: ILoadingContext) -> Any:
-        """Deserialize this field.
+        """Load this field.
 
         Args:
-            node: YAML node containing field value.
-            context: Loading context, handling include resolving and error
-                     management.
+            context: instance of LoadingContext, managing the current
+                     deserialization state.
 
         Return:
-            Deserialized field value, or UNDEFINED if loading failed.
+            Deserialized field value, or UNDEFINED if the loading failed.
 
         """
         field_value = self._load(context)
@@ -68,17 +69,6 @@ class BaseField(IBaseField):
 
     @abstractmethod
     def _load(self, context: ILoadingContext) -> Any:
-        """Deserialize this field using the given node.
-
-        Args:
-            node: YAML node containing field value.
-            context: Loading context, handling include resolving and error
-                     management.
-
-        Return:
-            Deserialized field value.
-
-        """
         raise NotImplementedError
 
 
