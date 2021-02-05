@@ -118,7 +118,7 @@ def test_load_defines_node_path(datadir: Path) -> None:
         }
 
         @classmethod
-        def validate(cls, _: Any, context: ILoadingContext) \
+        def validate(cls, context: ILoadingContext) \
                 -> None:
             """Validate that context as correct current_node_path."""
             nonlocal validate_called
