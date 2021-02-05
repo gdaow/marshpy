@@ -43,7 +43,9 @@ improvements. Feel free to join [the Pofy channel on Matrix](https://matrix.to/#
       - [import / try-import](#import--try-import)
       - [merge](#merge)
       - [Custom Tag Handlers](#custom-tag-handlers)
-    - [Custom Error Handling](#custom-error-handling)
+    - [Misc]
+      - [ValidationContext](#validationcontext)
+      - [Custom Error Handling](#custom-error-handling)
 
 ## Installation
 
@@ -53,46 +55,47 @@ Pofy is tested with Python 3.6 through 3.9. It can be installed through pip :
 
 ## Quickstart
 
-Pofy fields are defined in a Schema class, which is by default an inner class of
-the object you want to deserialize, called 'Schema'. The schema resolution can
-be customized through the [schema resolver](#schema-resolver) parameter of the
-load method, allowing to declare schema for existing classes without being
-intrusive.
-
-Once you declare the schema, you can load objects with the 'load' method :
+The following minimum code declares a deserializable object and loads it from
+a YAML document :
 
   ```python
       from pofy import StringField, load
 
       class Test:
           fields = {
-              'string': StringField()
+              'some_field': StringField()
           }
 
-      test = load(SomeObject, 'string: value')
-      assert test.string == 'value`
+      # > file.yaml :
+      # some_field: value
+
+      test = load('file.yaml', Test)
+      assert test.some_field == 'value`
   ```
 
 ## Reference
 
 ### Fields
 
-Although this behavior [can be customized](#field-resolver), by default fields
-will be looked up as a 'fields' class variable, which is expected to be a
-(string, field) dictionary. Keys of the dictionary are the name of the field,
-i.e the name of the member variable set on the loaded objects.
+Although this behavior [can be customized](#field-resolver) to allow
+deserialization of objects without adding intrusive class variable (for example,
+to load classes of a third-party library), fields are be looked up by default as
+a 'fields' class variable, which is expected to be a (string, field) dictionary.
+Keys of the dictionary are the name of the field, i.e the name of the member
+variable set on the loaded objects.
 
-Pofy comes with predefined fields described below. You can declare custom
-fields, to do so, refer to the [custom Fields][#custom-fields] section.
+Pofy comes with predefined fields described in the following sections. You can
+declare custom fields, to do so, refer to the [custom Fields][#custom-fields]
+section.
+
+#### Common Parameters
 
 All field types accept the following parameters :
 
-- **required (bool, optional):**
-
-  If set to true and the field is absent in the YAML document, a
-  MissingRequiredFieldError will be raised, or the
-  [custom error handler](#error-handling) you defined will be called with
-  the corresponding error code.
+- **required (bool, optional) :** If set to true and the field is absent in the
+  YAML document when the owning object is loaded, a MissingRequiredFieldError
+  will be raised, or if you defined a [custom error handler](#error-handling),
+  it will be called with the corresponding error code.
 
   ```python
     from pofy import StringField, load
@@ -106,32 +109,28 @@ All field types accept the following parameters :
     load('optional_field: some_value', Test) # Raises MissingRequiredFieldError
   ```
 
-All field types accept a 'validate' parameter. It must be a python callable
-object accepting a ILoadingContext , the field deserialized value, and must
-return a boolean if the field is valid, false other wise. See
-[object validation](#object-validation) for details about ILoadingContext, and
-on how to add informations to validation failure. If the validation fails, pofy
-will raise a ValidationError or the [error handler](#error-handling) you defined
-will be called with ErrorCode.VALIDATION_ERROR as the error_code parameter.
-Whole loaded objects can also be validated at once using the
-[object validation](#object-validation) system.
+- **validate (callable, optional) :** Python callable accepting a
+  ValidationContext and the value that was just deserialized, that will be
+  called to perform custom validation checks on isolated field values. For more
+  complex validation, involving multiple fields, validation checks can be also
+  be performed on whole objects at once (see
+  [Object Validation](#object-validation)).
 
-```python
-  from pofy import StringField, load
-
-  def _validate(context, value):
-    if value not in ['red', 'green', 'blue']:
-      return False
-
-    return True
-
-  class Test:
-    class Schema:
-      color = StringField(validate=_validate)
-
-  load('color: yellow', Test) # Raises ValidationError
-  load('color: blue', Test) # Raises ValidationError
-```
+  ```python
+    from pofy import StringField, load
+  
+    def _validate(context, value):
+  	  if value not in ['red', 'black']:
+  	    context.error('Color not allowed')
+  
+    class Test:
+      fields = {
+  	    'color': StringField(validate=_validate)
+      }
+  
+    load('color: yellow', Test) # Raises ValidationError
+    load('color: black', Test) # OK
+  ```
 
 #### BoolField
 
@@ -773,7 +772,11 @@ Before using it in YAML, the handler should be registered when calling the pofy
 
 ```
 
-### Custom Error Handling
+### Misc
+
+#### ValidationContext
+
+#### Custom Error Handling
 
 By default, Pofy will raise an exception when an error is encountered. This
 behavior can be overrided by passing a callable as the 'error _handler'

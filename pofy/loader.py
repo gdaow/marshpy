@@ -58,7 +58,7 @@ def load(
     field_resolver: Optional[FieldResolver] = None,
     hook_resolver: Optional[HookResolver] = None
 ) -> LoadResult[ObjectType]:
-    """Deserialize a YAML document into an object.
+    """Deserialize a YAML file, stream or string into an object.
 
     Args:
         source :            Either a string containing YAML, or a stream to a

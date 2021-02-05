@@ -30,7 +30,7 @@ NodeStack = List[Tuple[Node, Optional[str]]]
 
 
 class LoadingContext(ILoadingContext):
-    """Context aggregating resolve & error reporting functions."""
+    """Default and only implementation of ILoadingContext."""
 
     def __init__(
         self,
@@ -40,7 +40,27 @@ class LoadingContext(ILoadingContext):
         field_resolver: Optional[FieldResolver] = None,
         hook_resolver: Optional[HookResolver] = None
     ):
-        """Initialize context."""
+        """Initialize LoadingContext.
+
+        Args:
+            error_handler :     Called with arguments (node, error_message) when
+                                an error occurs. If it's not specified, a
+                                PofyError will be raised when an error occurs.
+                                (see errors.py)
+            tag_handlers :      Tag handlers used to apply custom behaviors when
+                                encountering YAML tags.
+            flags:              Flags to define during loading, that can be used
+                                with the !if tag (see IfTagHandler).
+            field_resolver:     Function returning the fields definition for the
+                                given type, or None if not found. By default, it
+                                will search for a class variable named 'fields'
+                                in the deserialized type.
+            hook_resolver:      Function returning the hook with the given name
+                                for the given object, or None if not found. By
+                                default, it will search for an instance method
+                                named like the hook on the given object.
+
+        """
         self._error_handler = error_handler
         self._tag_handlers = list(tag_handlers)
         self._node_stack: NodeStack = []

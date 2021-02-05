@@ -1,4 +1,4 @@
-"""Boolean field class & utilities."""
+"""Boolean field class module."""
 from gettext import gettext as _
 from typing import Any
 
@@ -9,7 +9,7 @@ from pofy.core.interfaces import ILoadingContext
 
 
 class BoolField(ScalarField):
-    """Boolean YAML object field."""
+    """Boolean field loader."""
 
     def _convert(self, context: ILoadingContext) -> Any:
         node = context.current_node()

@@ -11,7 +11,7 @@ from tests.helpers import check_load
 
 class _Test:
 
-    fields ={
+    fields = {
         'path': PathField(),
         'path_not_checked': PathField(must_exist=False)
     }
