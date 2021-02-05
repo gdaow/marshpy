@@ -21,13 +21,7 @@ improvements. Feel free to join [the Pofy channel on Matrix](https://matrix.to/#
   - [Installation](#installation)
   - [Quickstart](#quickstart)
   - [Reference](#reference)
-    - [Schemas](#schemas)
-      - [Object Validation](#object-validation)
-      - [Post Load Hook](#post-load-hook)
-      - [SchemaBase](#schemabase)
-      - [Schema Resolver](#schema-resolver)
     - [Fields](#fields)
-      - [Common Parameters](#common-parameters)
       - [BoolField](#boolfield)
       - [StringField](#stringfield)
       - [IntField](#intfield)
@@ -37,6 +31,10 @@ improvements. Feel free to join [the Pofy channel on Matrix](https://matrix.to/#
       - [ObjectField](#objectfield)
       - [ListField](#listfield)
       - [DictField](#dictfield)
+      - [Field Resolver](#field-resolver)
+    - [Hooks](#hooks)
+      - [Object Validation](#object-validation)
+      - [Post Load](#post-load)
     - [Tag Handlers](#tag-handlers)
       - [env](#env)
       - [first-of](#first-of)
@@ -46,7 +44,6 @@ improvements. Feel free to join [the Pofy channel on Matrix](https://matrix.to/#
       - [merge](#merge)
       - [Custom Tag Handlers](#custom-tag-handlers)
     - [Custom Error Handling](#custom-error-handling)
-    - [Creating Custom Fields](#creating-custom-fields)
 
 ## Installation
 
@@ -68,194 +65,46 @@ Once you declare the schema, you can load objects with the 'load' method :
       from pofy import StringField, load
 
       class Test:
-          class Schema:
-              field = StringField()
+          fields = {
+              'string': StringField()
+          }
 
-      test = load(SomeObject, 'field: value')
-      assert test.field == 'value`
+      test = load(SomeObject, 'string: value')
+      assert test.string == 'value`
   ```
 
 ## Reference
 
-### Schemas
-
-Schemas are python classe declaring how a python type should be deserialized
-from YAML. They can contain a list of [fields](#fields) as class members, as
-showed in the [quickstart section](#quickstart). They can declare hook methods
-that can be used for object validation and post-load operations. By default, the
-Schema for a python class is looked up by searching for a nested class named
-'Schema'. This behavior is customizable through the
-[schema_resolver](#schema-resolver) argument passed to the load() method.
-
-#### Object Validation
-
-When an object is loaded by Pofy, if a 'validate' class method is defined on the
-Schema class, it will be called with a ValidationContext and the deserialized
-object as arguments. The ValidationContext exposes the following methods :
-
-- current_location() : If the current YAML document was loaded from a file,
-  returns that file path, else returns None
-
-- error(message_format, *args, **kwargs) : Will raise a ValidationError, or
-  or the defined [error handler](#error-handling) will be called with
-  ErrorCode.VALIDATION_ERROR as the error_code parameter, and the given string
-  format formatted with *args and **kwargs as message.
-
-If no error_handler is defined when loading a YAML document, an exception will
-be raised, terminating the loading at the first call of error(). However, if
-some custom error handling is set up, the execution will continue after the
-first validation error, so be aware of that when writing validation methods.
-
-Here is an example of the declaration of a validation method :
-
-```python
-  from pofy import StringField, ValidationContext
-
-  class Test:
-    class Schema:
-      color = StringField()
-
-      def validate(cls, context: ValidationContext, obj: Any):
-        assert isinstance(obj, Test)
-        if obj.color not in ['red', 'green', 'blue']:
-          context.error('Color not allowed')
-
-```
-
-#### Post Load
-
-In the same fashion the [validate](#object-validation) method can be declared,
-a 'post_load' method will be called if it exists on the Schema class upon
-object loading. The only argument will be the deserialized object :
-
-```python
-  from pofy import StringField
-
-  class Test:
-    class Schema:
-      color = StringField()
-
-      def post_load(cls, obj: Any):
-        assert isinstance(obj, Test)
-        obj.color = obj.color.toupper()
-
-```
-
-#### SchemaBase
-
-Pofy provides a SchemaBase class, but it's usage is facultative. It sole purpose
-is to call the [validate](#object-validation) and [post_load](#post-load)
-methods directly on the deserialized object, rather than on the schema class :
-
-```python
-  from pofy import StringField, ValidationContext, SchemaBase
-
-  class Test:
-    class Schema(SchemaBase):
-      color = StringField()
-
-    def validate(self, context: ValidationContext):
-      assert isinstance(obj, Test)
-      if not color in ['red', 'green', 'blue']:
-        context.error('Color not allowed')
-    
-    def post_load(self):
-      assert isinstance(obj, Test)
-      obj.color = obj.color.toupper()
-
-```
-
-Notice that in the case your objects inherits from another deserializable object
-with a Schema inheriting from SchemaBase, you don't have to call
-super().validate(...) and super.post_load(), as the Schema at each level of
-inheritance will already do it :
-
-
-```python
-  from pofy import StringField, ValidationContext, SchemaBase
-
-  class Parent:
-    class Schema(SchemaBase):
-      color = StringField()
-
-    def validate(self, context: ValidationContext):
-      ...
-    
-    def post_load(self):
-      ...
-
-  class Child:
-    class Schema(SchemaBase):
-      child_color = StringField()
-
-    def validate(self, context: ValidationContext):
-      # don't call super().validate(context) here, it will already be called by 
-      # Parent.Schema
-      ...
-    
-    def post_load(self):
-      # don't call super().post_load() here, it will already be called by 
-      # Parent.Schema
-      ...
-
-```
-
-#### Schema Resolver
-
-The default behavior to resolve schemas for a given type is to search for a
-nested class called 'Schema'. This behavior can be overrided by passing a
-callable to the load function as the 'schema_resolver' parameter. This callable
-will be called with the type to deserialize and should return a schema for this
-type, or None if not was found. This allows to deserialize types without having
-to intrusively declare Schema in it, for example if you want to deserialize
-objects declared in a third-party library. Here is an example of a
-schema_resolver searching in a dictionnary to resolve schemas.
-
-
-```python
-  from pofy import load, StringField
-
-  class Class:
-    pass
-
-  class ClassSchema:
-    color = StringField()
-
-  SCHEMA_MAPPING = {
-    Class: ClassSchema
-  }
-
-  def custom_schema_resolver(type: Type[Any]) -> Type[Any]:
-    return SCHEMA_MAPPING[type]
-
-  ...
-
-  obj = load(Class, schema_resolver=custom_schema_resolver)
-
-```
-
 ### Fields
+
+Although this behavior [can be customized](#field-resolver), by default fields
+will be looked up as a 'fields' class variable, which is expected to be a
+(string, field) dictionary. Keys of the dictionary are the name of the field,
+i.e the name of the member variable set on the loaded objects.
 
 Pofy comes with predefined fields described below. You can declare custom
 fields, to do so, refer to the [custom Fields][#custom-fields] section.
 
-#### Common Parameters
+All field types accept the following parameters :
 
-All field types accept a 'required' boolean parameter. If it's set and the field
-is absent in the YAML document, a MissingRequiredFieldError will be raised, or
-the [error handler](#error-handling) you defined will be called with
-ErrorCode.MISSING_REQUIRED_FIELD as the error_code parameter :
+- **required (bool, optional):**
 
-```python
-  from pofy import StringField, load
+  If set to true and the field is absent in the YAML document, a
+  MissingRequiredFieldError will be raised, or the
+  [custom error handler](#error-handling) you defined will be called with
+  the corresponding error code.
 
-  class Test:
-    class Schema:
-      required_field = StringField(required=True)
-      optional_field = StringField()
+  ```python
+    from pofy import StringField, load
 
-  load('optional_field: some_value', Test) # Raises MissingRequiredFieldError
-```
+    class Test:
+        fields = {
+          'required_field': StringField(required=True),
+          'optional_field': StringField()
+        }
+
+    load('optional_field: some_value', Test) # Raises MissingRequiredFieldError
+  ```
 
 All field types accept a 'validate' parameter. It must be a python callable
 object accepting a ILoadingContext , the field deserialized value, and must
@@ -575,6 +424,95 @@ dictionary of another object as member :
   assert isinstance(parent.child['second'], Child)
   assert parent.child['first'].name == 'first_child'
   assert parent.child['second'].name == 'second_child'
+
+```
+
+#### Field Resolver
+
+The default behavior to resolve schemas for a given type is to search for a
+nested class called 'Schema'. This behavior can be overrided by passing a
+callable to the load function as the 'schema_resolver' parameter. This callable
+will be called with the type to deserialize and should return a schema for this
+type, or None if not was found. This allows to deserialize types without having
+to intrusively declare Schema in it, for example if you want to deserialize
+objects declared in a third-party library. Here is an example of a
+schema_resolver searching in a dictionnary to resolve schemas.
+
+```python
+  from pofy import load, StringField
+
+  class Class:
+    pass
+
+  class ClassSchema:
+    color = StringField()
+
+  SCHEMA_MAPPING = {
+    Class: ClassSchema
+  }
+
+  def custom_schema_resolver(type: Type[Any]) -> Type[Any]:
+    return SCHEMA_MAPPING[type]
+
+  ...
+
+  obj = load(Class, schema_resolver=custom_schema_resolver)
+
+```
+
+### Hooks
+
+#### Object Validation
+
+When an object is loaded by Pofy, if a 'validate' class method is defined on the
+Schema class, it will be called with a ValidationContext and the deserialized
+object as arguments. The ValidationContext exposes the following methods :
+
+- current_location() : If the current YAML document was loaded from a file,
+  returns that file path, else returns None
+
+- error(message_format, *args, **kwargs) : Will raise a ValidationError, or
+  or the defined [error handler](#error-handling) will be called with
+  ErrorCode.VALIDATION_ERROR as the error_code parameter, and the given string
+  format formatted with *args and **kwargs as message.
+
+If no error_handler is defined when loading a YAML document, an exception will
+be raised, terminating the loading at the first call of error(). However, if
+some custom error handling is set up, the execution will continue after the
+first validation error, so be aware of that when writing validation methods.
+
+Here is an example of the declaration of a validation method :
+
+```python
+  from pofy import StringField, ValidationContext
+
+  class Test:
+    class Schema:
+      color = StringField()
+
+      def validate(cls, context: ValidationContext, obj: Any):
+        assert isinstance(obj, Test)
+        if obj.color not in ['red', 'green', 'blue']:
+          context.error('Color not allowed')
+
+```
+
+#### Post Load
+
+In the same fashion the [validate](#object-validation) method can be declared,
+a 'post_load' method will be called if it exists on the Schema class upon
+object loading. The only argument will be the deserialized object :
+
+```python
+  from pofy import StringField
+
+  class Test:
+    class Schema:
+      color = StringField()
+
+      def post_load(cls, obj: Any):
+        assert isinstance(obj, Test)
+        obj.color = obj.color.toupper()
 
 ```
 
