@@ -8,7 +8,7 @@ from pofy.core.constants import UNDEFINED
 from pofy.core.errors import ErrorCode
 from pofy.core.interfaces import ILoadingContext
 from pofy.core.validation import ValidateCallback
-from pofy.fields.base_field import ScalarField
+from pofy.fields.scalar_field import ScalarField
 
 
 class PathField(ScalarField):
@@ -32,9 +32,7 @@ class PathField(ScalarField):
         super().__init__(required=required, validate=validate)
         self._must_exist = must_exist
 
-    def _convert(self, context: ILoadingContext) -> Any:
-        node = context.current_node()
-        value = node.value
+    def _convert(self, context: ILoadingContext, value: str) -> Any:
         path = Path(value)
 
         if not path.is_absolute() and not path.exists():

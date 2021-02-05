@@ -9,7 +9,7 @@ from pofy.core.constants import UNDEFINED
 from pofy.core.errors import ErrorCode
 from pofy.core.interfaces import ILoadingContext
 from pofy.core.validation import ValidateCallback
-from pofy.fields.base_field import ScalarField
+from pofy.fields.scalar_field import ScalarField
 
 
 class StringField(ScalarField):
@@ -41,9 +41,7 @@ class StringField(ScalarField):
             self._pattern_str = pattern
             self._pattern = re_compile(pattern)
 
-    def _convert(self, context: ILoadingContext) -> Any:
-        value = context.current_node().value
-
+    def _convert(self, context: ILoadingContext, value: str) -> Any:
         if self._pattern is not None and not self._pattern.match(value):
             context.error(
                 ErrorCode.VALIDATION_ERROR,

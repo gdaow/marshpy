@@ -8,7 +8,7 @@ from pofy.core.constants import UNDEFINED
 from pofy.core.errors import ErrorCode
 from pofy.core.interfaces import ILoadingContext
 from pofy.core.validation import ValidateCallback
-from pofy.fields.base_field import ScalarField
+from pofy.fields.scalar_field import ScalarField
 
 
 class IntField(ScalarField):
@@ -41,9 +41,7 @@ class IntField(ScalarField):
         self._minimum = minimum
         self._maximum = maximum
 
-    def _convert(self, context: ILoadingContext) -> Any:
-        node = context.current_node()
-        value = node.value
+    def _convert(self, context: ILoadingContext, value: str) -> Any:
         result: Optional[int] = None
 
         try:

@@ -9,7 +9,7 @@ from pofy.core.constants import UNDEFINED
 from pofy.core.errors import ErrorCode
 from pofy.core.interfaces import ILoadingContext
 from pofy.core.validation import ValidateCallback
-from pofy.fields.base_field import ScalarField
+from pofy.fields.scalar_field import ScalarField
 
 
 class EnumField(ScalarField):
@@ -32,17 +32,15 @@ class EnumField(ScalarField):
         super().__init__(required=required, validate=validate)
         self._enum_class = enum_class
 
-    def _convert(self, context: ILoadingContext) -> Any:
-        string_value = context.current_node().value
-
+    def _convert(self, context: ILoadingContext, value: str) -> Any:
         for member in self._enum_class:
-            if member.name == string_value:
+            if member.name == value:
                 return member
 
         context.error(
             ErrorCode.VALIDATION_ERROR,
             _('Unkown value {} for enum {}.'),
-            string_value,
+            value,
             self._enum_class
         )
         return UNDEFINED
