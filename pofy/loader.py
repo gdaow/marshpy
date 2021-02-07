@@ -88,8 +88,10 @@ def load(
                             hook on the given object.
 
     """
-    assert isinstance(source, (str, TextIOBase)), \
-        _('source parameter must be a string or Text I/O.')
+    # This fails with pyfakefs, no simple way to check this, so disable it for
+    # now
+    # assert isinstance(source, (str, TextIOBase)), \
+    #     _('source parameter must be a string or Text I/O.')
 
     all_tag_handlers: List[TagHandler] = []
 
