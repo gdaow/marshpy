@@ -149,36 +149,42 @@ corresponding error code.
   from pofy import BoolField, load
 
   class Test:
-    class Schema:
-      some_flag = BoolField()
+    fields = {
+      'some_flag' = BoolField()
+    }
 
   test = load('some_flag: on', Test)
   assert test.some_flag
-  test = load('some_flag: NotValid', Test) # Raises ValueError
+  test = load('some_flag: Oui', Test) # Raises ValueError
 ```
 
 #### StringField
 
-StringField loads a string from YAML. The field constructor accept a 'pattern'
-parameter, that must be a valid regular expression that deserialized values
-should match. If pattern is defined and the deserialized values doesn't match
-it, a ValidationError will be raised or the [error handler](#error-handling) you
-defined will be called with ErrorCode.VALIDATION_ERROR as the error_code
-parameter.
+Beyond [the common ones](#common-parameters), this field accepts the following
+constructor parameters :
+
+- **pattern (string, optional)** :
+  Regular expression pattern that the field should match. If pattern is defined
+  and the loaded YAML value don't match it, a ValidationError will be raised or,
+  if you defined a [custom error handler](#error-handling), it will be called
+  with the corresponding error code.
 
 ```python
   from pofy import StringField, load
 
-  class Test:
-    class Schema:
-      string_field = StringField()
-      pattern_field = StringField(pattern='[0-9]*')
+  class Person:
+    fields = {
+      'name': StringField()
+      'age': StringField(pattern='[0-9]*')
+    }
 
-  test = load('string_field: "foo bar"', Test)
-  assert test.string_field == 'foo bar'
-  test = load('pattern_field: NotValid', Test) # Raises ValidationError
-  test = load('pattern_field: 10', Test)
-  assert test.pattern_field == '10'
+  test = load('name: Nestor', Person)
+  assert test.string_field == 'Nestor'
+
+  test = load('age: Thirty-four', Person) # Raises ValidationError
+
+  test = load('age: 34', Person)
+  assert test.age == '34'
 ```
 
 #### IntField
