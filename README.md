@@ -22,6 +22,7 @@ improvements. Feel free to join [the Pofy channel on Matrix](https://matrix.to/#
   - [Quickstart](#quickstart)
   - [Reference](#reference)
     - [Fields](#fields)
+      - [Common Parameters](#common-parameters)
       - [BoolField](#boolfield)
       - [StringField](#stringfield)
       - [IntField](#intfield)
@@ -43,7 +44,7 @@ improvements. Feel free to join [the Pofy channel on Matrix](https://matrix.to/#
       - [import / try-import](#import--try-import)
       - [merge](#merge)
       - [Custom Tag Handlers](#custom-tag-handlers)
-    - [Misc]
+    - [Misc](#misc)
       - [ValidationContext](#validationcontext)
       - [Custom Error Handling](#custom-error-handling)
 
@@ -120,12 +121,12 @@ All field types accept the following parameters :
     from pofy import StringField, load
   
     def _validate(context, value):
-  	  if value not in ['red', 'black']:
-  	    context.error('Color not allowed')
+      if value not in ['red', 'black']:
+        context.error('Color not allowed')
   
     class Test:
       fields = {
-  	    'color': StringField(validate=_validate)
+        'color': StringField(validate=_validate)
       }
   
     load('color: yellow', Test) # Raises ValidationError
@@ -134,15 +135,15 @@ All field types accept the following parameters :
 
 #### BoolField
 
-BoolField loads a boolean from YAML. No additional parameter is available. The
-following values are accepted when loading a boolean from YAML :
+No other parameter than [the common ones](#common-parameters) are available for
+this field. The following values are accepted when loading a boolean from YAML :
 
 - For true : y, Y, yes, Yes, YES, true, True, TRUE, on, On, ON
 - For false : n, N, no, No, NO, false, False, FALSE, off, Off, OFF
 
-Any other value will raise a ValidationError, or call the defined
-[error handler](#error-handling) with VALIDATION_ERROR as the error_code
-parameter.
+Any other value will raise a ValueError or, if you defined a
+[custom error handler](#error-handling), it will be called with the
+corresponding error code.
 
 ```python
   from pofy import BoolField, load
@@ -153,7 +154,7 @@ parameter.
 
   test = load('some_flag: on', Test)
   assert test.some_flag
-  test = load('some_flag: NotValid', Test) # Raises ValidationError
+  test = load('some_flag: NotValid', Test) # Raises ValueError
 ```
 
 #### StringField
