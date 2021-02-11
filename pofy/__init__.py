@@ -15,6 +15,7 @@ from .core.errors import TypeResolveError
 from .core.errors import UnexpectedNodeTypeError
 from .core.errors import ValidationError
 from .core.errors import get_exception_type
+from .core.interfaces import ILoadingContext
 from .core.loading_context import LoadingContext
 
 from .fields.base_field import BaseField
