@@ -5,10 +5,14 @@ from typing import Callable
 from typing import Dict
 from typing import Optional
 from typing import Type
+from typing import TypeVar
 
 from yaml import Node
 
 from pofy.core.errors import ErrorCode
+
+
+ConfigType = TypeVar('ConfigType')
 
 
 class IBaseField:
@@ -69,6 +73,10 @@ class ILoadingContext:
     @abstractmethod
     def get_hook(self, obj: Any, name: str) -> Optional[Callable[..., None]]:
         """Get the hook with the given name for the given object."""
+
+    @abstractmethod
+    def get_user_config(self, config_type: Type[ConfigType]) -> ConfigType:
+        """Retrieve a custom user config object."""
 
     @abstractmethod
     def current_node(self) -> Node:

@@ -3,6 +3,7 @@ from gettext import gettext as _
 from inspect import isclass
 from io import TextIOBase
 from pathlib import Path
+from typing import Any
 from typing import IO
 from typing import Iterable
 from typing import List
@@ -47,7 +48,7 @@ _ROOT_FIELDS_MAPPING = {
 ObjectType = TypeVar('ObjectType')
 
 
-def load(
+def load( # pylint: disable=too-many-locals
     source: Union[str, IO[str]],
     object_class: Optional[Type[ObjectType]] = None,
     resolve_roots: Optional[Iterable[Path]] = None,
@@ -56,7 +57,8 @@ def load(
     root_field: Optional[BaseField] = None,
     flags: Optional[Set[str]] = None,
     field_resolver: Optional[FieldResolver] = None,
-    hook_resolver: Optional[HookResolver] = None
+    hook_resolver: Optional[HookResolver] = None,
+    user_config: Optional[List[Any]] = None
 ) -> LoadResult[ObjectType]:
     """Deserialize a YAML file, stream or string into an object.
 
@@ -86,6 +88,9 @@ def load(
                             the given object, or None if not found. By default,
                             it will search for an instance method named like the
                             hook on the given object.
+        user_config:        List of objects used to eventually configure custom
+                            fields, that will be retrievable through the
+                            get_user_config method.
 
     """
     # This fails with pyfakefs, no simple way to check this, so disable it for
@@ -115,16 +120,18 @@ def load(
         tag_handlers=all_tag_handlers,
         flags=flags,
         field_resolver=field_resolver,
-        hook_resolver=hook_resolver
+        hook_resolver=hook_resolver,
+        user_config=user_config
     )
 
-    assert isclass(object_class), _('object_class must be a type')
     if root_field is None:
         assert object_class is not None
+        assert isclass(object_class), _('object_class must be a type')
         root_field = _ROOT_FIELDS_MAPPING.get(object_class)
 
     if root_field is None:
         assert object_class is not None
+        assert isclass(object_class), _('object_class must be a type')
         root_field = ObjectField(object_class=object_class)
 
     node = compose(source) # type: ignore

@@ -18,6 +18,7 @@ from yaml import SequenceNode
 
 from pofy.core.errors import ErrorCode
 from pofy.core.errors import get_exception_type
+from pofy.core.interfaces import ConfigType
 from pofy.core.interfaces import IBaseField
 from pofy.core.interfaces import ILoadingContext
 from pofy.tag_handlers.tag_handler import TagHandler
@@ -38,7 +39,8 @@ class LoadingContext(ILoadingContext):
         tag_handlers: Iterable[TagHandler],
         flags: Optional[Set[str]] = None,
         field_resolver: Optional[FieldResolver] = None,
-        hook_resolver: Optional[HookResolver] = None
+        hook_resolver: Optional[HookResolver] = None,
+        user_config: Optional[List[Any]] = None
     ):
         """Initialize LoadingContext.
 
@@ -59,6 +61,9 @@ class LoadingContext(ILoadingContext):
                                 for the given object, or None if not found. By
                                 default, it will search for an instance method
                                 named like the hook on the given object.
+            user_config:        List of objects used to eventually configure
+                                custom fields, that will be retrievable through
+                                the get_user_config method.
 
         """
         self._error_handler = error_handler
@@ -74,6 +79,11 @@ class LoadingContext(ILoadingContext):
             self._hook_resolver = hook_resolver
         else:
             self._hook_resolver = _default_hook_resolver
+
+        if user_config is not None:
+            self._user_config = user_config
+        else:
+            self._user_config = []
 
     def load(
         self,
@@ -119,17 +129,20 @@ class LoadingContext(ILoadingContext):
     def get_hook(self, obj: Any, name: str) -> Optional[Callable[..., None]]:
         return self._hook_resolver(obj, name)
 
+    def get_user_config(self, config_type: Type[ConfigType]) -> ConfigType:
+        for item in self._user_config:
+            if isinstance(item, config_type):
+                return item
+
+        assert False, "No user configuration object of the given type was found"
+        return None
+
     def current_node(self) -> Node:
-        """Return the currently loaded node."""
         nodes = self._node_stack
         assert len(nodes) > 0
         return nodes[-1][0]
 
     def current_location(self) -> Optional[str]:
-        """Return the location of the document owning the current node.
-
-        If no path can be found, returs None.
-        """
         for __, location in reversed(self._node_stack):
             if location is not None:
                 return location
