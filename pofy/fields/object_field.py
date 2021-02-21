@@ -20,7 +20,7 @@ from pofy.fields.string_field import StringField
 
 FieldsResolver = Callable[[Type[Any]], Dict[str, IBaseField]]
 HookResolver = Callable[[Any, str], Optional[Callable[..., None]]]
-TypeResolver = Callable[[str], Type[Any]]
+TypeResolver = Callable[[str, ILoadingContext], Type[Any]]
 
 _TYPE_FORMAT_MSG = _("""\
 Type tag should be in the form !type:path.to.Type, got {}""")
@@ -43,6 +43,10 @@ class ObjectField(BaseField):
             self._fields_resolver = fields_resolver if fields_resolver is not None else self._default_fields_resolver
             self._hook_resolver = hook_resolver if hook_resolver is not None else self._default_hook_resolver
 
+        def get_type(self, type_name: str, context: ILoadingContext) -> Optional[Type[Any]]:
+            """Get hook of given name for given object."""
+            return self._type_resolver(type_name, context)
+
         def get_fields(self, obj: Any) -> Dict[str, IBaseField]:
             """Get fields for the given object."""
             return self._fields_resolver(obj)
@@ -52,8 +56,33 @@ class ObjectField(BaseField):
             return self._hook_resolver(obj, hook_name)
 
         @staticmethod
-        def _default_type_resolver(type_name: str) -> Type[Any]:
-            pass
+        def _default_type_resolver(type_name: str, context: ILoadingContext) -> Optional[Type[Any]]:
+            splitted_name = type_name.split('.')
+
+            if len(splitted_name) < 2:
+                context.error(ErrorCode.BAD_TYPE_TAG_FORMAT, _TYPE_FORMAT_MSG, type_name)
+                return None
+
+            module_name = '.'.join(splitted_name[:-1])
+            class_name = splitted_name[-1]
+
+            try:
+                module = __import__(module_name, fromlist=class_name)
+            except ModuleNotFoundError:
+                context.error(ErrorCode.TYPE_RESOLVE_ERROR, _('Can\'t find python module for type {}'), type_name)
+                return None
+
+            if not hasattr(module, class_name):
+                context.error(ErrorCode.TYPE_RESOLVE_ERROR, _('Can\'t find python type {}'), type_name)
+                return None
+
+            resolved_type = getattr(module, class_name)
+
+            if not isclass(resolved_type):
+                context.error(ErrorCode.TYPE_RESOLVE_ERROR, _('Python type {} is not a class'), type_name)
+                return None
+
+            return cast(Type[Any], resolved_type)
 
         @staticmethod
         def _default_fields_resolver(object_class: Type[Any]) -> Dict[str, IBaseField]:
@@ -69,10 +98,6 @@ class ObjectField(BaseField):
                 return None
 
             hook = getattr(obj, hook_name)
-
-            if not callable(hook):
-                return None
-
             return cast(Callable[..., Any], hook)
 
     def __init__(
@@ -90,92 +115,33 @@ class ObjectField(BaseField):
 
         """
         super().__init__(required=required, validate=validate)
-        assert isclass(object_class), \
-            _('object_class must be a type')
+        assert isclass(object_class), _('object_class must be a type')
         self._object_class = object_class
 
     def _load(self, context: ILoadingContext) -> Any:
         if not context.expect_mapping():
             return UNDEFINED
 
-        object_class = self._resolve_type(context)
+        config = context.get_config(ObjectField.Config)
+        node = context.current_node()
+        tag = str(node.tag)
+        if tag.startswith('!type'):
+            splitted_tag = tag.split(':')
+            if len(splitted_tag) != 2:
+                context.error(ErrorCode.BAD_TYPE_TAG_FORMAT, _TYPE_FORMAT_MSG, tag)
+                return None
+            type_name = splitted_tag[1]
+            object_class = config.get_type(type_name, context)
+        else:
+            object_class = self._object_class
+
         if object_class is None:
             return UNDEFINED
 
-        return _load(object_class, context)
-
-    def _resolve_type(self, context: ILoadingContext) -> Optional[Type[Any]]:
-        node = context.current_node()
-        tag = str(node.tag)
-        if not tag.startswith('!type'):
-            return self._object_class
-
-        if ':' not in tag:
-            context.error(
-                ErrorCode.BAD_TYPE_TAG_FORMAT,
-                _TYPE_FORMAT_MSG, tag
-            )
-            return None
-
-        full_name = tag.split(':')
-        if len(full_name) != 2:
-            context.error(
-                ErrorCode.BAD_TYPE_TAG_FORMAT,
-                _TYPE_FORMAT_MSG, tag
-            )
-            return None
-
-        full_name_str = full_name[1]
-        full_name = full_name_str.split('.')
-
-        if len(full_name) < 2:
-            context.error(
-                ErrorCode.BAD_TYPE_TAG_FORMAT,
-                _TYPE_FORMAT_MSG, tag
-            )
-            return None
-
-        module_name = '.'.join(full_name[:-1])
-        type_name = full_name[-1]
-        return _get_type(module_name, type_name, context)
+        return _load(object_class, context, config)
 
 
-def _get_type(
-    module_name: str,
-    type_name: str,
-    context: ILoadingContext
-) -> Optional[Type[Any]]:
-    full_name = r'{}.{}'.format(module_name, type_name)
-    try:
-        module = __import__(module_name, fromlist=type_name)
-    except ModuleNotFoundError:
-        context.error(
-            ErrorCode.TYPE_RESOLVE_ERROR,
-            _('Can\'t find python module for type {}'), full_name
-        )
-        return None
-
-    if not hasattr(module, type_name):
-        context.error(
-            ErrorCode.TYPE_RESOLVE_ERROR,
-            _('Can\'t find python type {}'), full_name
-        )
-        return None
-
-    resolved_type = getattr(module, type_name)
-
-    if not isclass(resolved_type):
-        context.error(
-            ErrorCode.TYPE_RESOLVE_ERROR,
-            _('Python type {} is not a class'), full_name
-        )
-        return None
-
-    return cast(Type[Any], resolved_type)
-
-
-def _load(object_class: Type[Any], context: ILoadingContext) -> Any:
-    config = context.get_config(ObjectField.Config)
+def _load(object_class: Type[Any], context: ILoadingContext, config: ObjectField.Config) -> Any:
     fields = _get_fields(object_class, config)
 
     if len(fields) == 0:
@@ -187,22 +153,6 @@ def _load(object_class: Type[Any], context: ILoadingContext) -> Any:
         )
         return UNDEFINED
 
-    result, set_fields = _load_object(object_class, fields, context)
-    if _validate_object(result, fields, set_fields, context, config):
-        post_load = config.get_hook(result, 'post_load')
-        if post_load is not None:
-            post_load()
-
-        return result
-
-    return UNDEFINED
-
-
-def _load_object(
-    object_class: Type[Any],
-    fields: Dict[str, IBaseField],
-    context: ILoadingContext
-) -> Any:
     node = context.current_node()
     result = object_class()
     set_fields = set()
@@ -228,10 +178,30 @@ def _load_object(
 
         setattr(result, field_name, field_value)
 
-    return (result, set_fields)
+    if _validate(result, fields, set_fields, context, config):
+        post_load = config.get_hook(result, 'post_load')
+        if post_load is not None:
+            post_load()
+
+        return result
+
+    return UNDEFINED
 
 
-def _validate_object(
+def _get_fields(cls: Type[Any], config: ObjectField.Config) -> Dict[str, IBaseField]:
+    fields = {}
+
+    for parent in cls.__bases__:
+        parent_fields = _get_fields(parent, config)
+        fields.update(parent_fields)
+
+    class_fields = config.get_fields(cls)
+    fields.update(class_fields)
+
+    return fields
+
+
+def _validate(
     obj: Any,
     fields: Dict[str, IBaseField],
     set_fields: Set[str],
@@ -255,16 +225,3 @@ def _validate_object(
         valid_object = valid_object and not validation_context.has_error()
 
     return valid_object
-
-
-def _get_fields(cls: Type[Any], config: ObjectField.Config) -> Dict[str, IBaseField]:
-    fields = {}
-
-    for parent in cls.__bases__:
-        parent_fields = _get_fields(parent, config)
-        fields.update(parent_fields)
-
-    class_fields = config.get_fields(cls)
-    fields.update(class_fields)
-
-    return fields

@@ -23,10 +23,7 @@ class IfHandler(TagHandler):
 
         def __init__(self, flags: Optional[Iterable[str]] = None) -> None:
             """Initialize the config."""
-            if flags is not None:
-                self._flags = set(flags)
-            else:
-                self._flags = set()
+            self._flags = set(flags) if flags is not None else set()
 
         def is_defined(self, flag: str) -> bool:
             """Check that the given flag is defined."""
