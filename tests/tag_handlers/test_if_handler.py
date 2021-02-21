@@ -14,7 +14,9 @@ def test_if_tag_handler() -> None:
         '!if(FLAG) test_value',
         field=StringField(),
         tag_handlers=[IfHandler()],
-        flags={'FLAG'}
+        config=[
+            IfHandler.Config({'FLAG'})
+        ]
     )
     assert result == 'test_value'
 
@@ -22,7 +24,9 @@ def test_if_tag_handler() -> None:
         '!if(UNDEFINED) test_value',
         field=StringField(),
         tag_handlers=[IfHandler()],
-        flags={'FLAG'}
+        config=[
+            IfHandler.Config({'FLAG'})
+        ]
     )
     assert result == UNDEFINED
 
@@ -30,7 +34,9 @@ def test_if_tag_handler() -> None:
         '!if(FLAG) {key: value}',
         field=DictField(StringField()),
         tag_handlers=[IfHandler()],
-        flags={'FLAG'}
+        config=[
+            IfHandler.Config({'FLAG'})
+        ]
     )
     assert result == {'key': 'value'}
 
@@ -38,7 +44,9 @@ def test_if_tag_handler() -> None:
         '!if(FLAG) [item]',
         field=ListField(StringField()),
         tag_handlers=[IfHandler()],
-        flags={'FLAG'}
+        config=[
+            IfHandler.Config({'FLAG'})
+        ]
     )
 
     assert result == ['item']

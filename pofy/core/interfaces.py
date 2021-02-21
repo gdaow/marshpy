@@ -1,8 +1,6 @@
 """Pofy common definitions."""
 from abc import abstractmethod
 from typing import Any
-from typing import Callable
-from typing import Dict
 from typing import Optional
 from typing import Type
 from typing import TypeVar
@@ -63,20 +61,8 @@ class ILoadingContext:
         """
 
     @abstractmethod
-    def is_defined(self, flag: str) -> bool:
-        """Return true if the given flag was defined when calling load."""
-
-    @abstractmethod
-    def get_fields(self, cls: Type[Any]) -> Dict[str, IBaseField]:
-        """Get the fields for the given type."""
-
-    @abstractmethod
-    def get_hook(self, obj: Any, name: str) -> Optional[Callable[..., None]]:
-        """Get the hook with the given name for the given object."""
-
-    @abstractmethod
-    def get_user_config(self, config_type: Type[ConfigType]) -> ConfigType:
-        """Retrieve a custom user config object."""
+    def get_config(self, config_type: Type[ConfigType]) -> ConfigType:
+        """Retrieve a config object."""
 
     @abstractmethod
     def current_node(self) -> Node:

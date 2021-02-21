@@ -1,15 +1,11 @@
 """Loading context class & utilities."""
 from gettext import gettext as _
 from typing import Any
-from typing import Callable
-from typing import Dict
 from typing import Iterable
 from typing import List
 from typing import Optional
-from typing import Set
 from typing import Tuple
 from typing import Type
-from typing import cast
 
 from yaml import MappingNode
 from yaml import Node
@@ -17,6 +13,7 @@ from yaml import ScalarNode
 from yaml import SequenceNode
 
 from pofy.core.errors import ErrorCode
+from pofy.core.errors import ErrorHandler
 from pofy.core.errors import get_exception_type
 from pofy.core.interfaces import ConfigType
 from pofy.core.interfaces import IBaseField
@@ -24,9 +21,6 @@ from pofy.core.interfaces import ILoadingContext
 from pofy.tag_handlers.tag_handler import TagHandler
 
 
-ErrorHandler = Optional[Callable[[Node, ErrorCode, str], Any]]
-FieldResolver = Callable[[Type[Any]], Dict[str, 'IBaseField']]
-HookResolver = Callable[[Any, str], Optional[Callable[..., None]]]
 NodeStack = List[Tuple[Node, Optional[str]]]
 
 
@@ -35,55 +29,28 @@ class LoadingContext(ILoadingContext):
 
     def __init__(
         self,
-        error_handler: ErrorHandler,
+        error_handler: Optional[ErrorHandler],
         tag_handlers: Iterable[TagHandler],
-        flags: Optional[Set[str]] = None,
-        field_resolver: Optional[FieldResolver] = None,
-        hook_resolver: Optional[HookResolver] = None,
-        user_config: Optional[List[Any]] = None
+        config: Optional[List[Any]] = None
     ):
         """Initialize LoadingContext.
 
         Args:
-            error_handler :     Called with arguments (node, error_message) when
-                                an error occurs. If it's not specified, a
-                                PofyError will be raised when an error occurs.
-                                (see errors.py)
-            tag_handlers :      Tag handlers used to apply custom behaviors when
-                                encountering YAML tags.
-            flags:              Flags to define during loading, that can be used
-                                with the !if tag (see IfTagHandler).
-            field_resolver:     Function returning the fields definition for the
-                                given type, or None if not found. By default, it
-                                will search for a class variable named 'fields'
-                                in the deserialized type.
-            hook_resolver:      Function returning the hook with the given name
-                                for the given object, or None if not found. By
-                                default, it will search for an instance method
-                                named like the hook on the given object.
-            user_config:        List of objects used to eventually configure
-                                custom fields, that will be retrievable through
-                                the get_user_config method.
+            error_handler : Called with arguments (node, error_message) when an error occurs. If it's not specified, a
+                            PofyError will be raised when an error occurs. (see errors.py)
+            tag_handlers :  Tag handlers used to apply custom behaviors when encountering YAML tags.
+            config:         List of objects used to eventually configure fields and tag handlers, that will be
+                            retrievable through the get_config method.
 
         """
         self._error_handler = error_handler
         self._tag_handlers = list(tag_handlers)
         self._node_stack: NodeStack = []
-        self._flags = flags if flags is not None else set()
-        if field_resolver is not None:
-            self._field_resolver = field_resolver
-        else:
-            self._field_resolver = _default_field_resolver
 
-        if hook_resolver is not None:
-            self._hook_resolver = hook_resolver
+        if config is not None:
+            self._config = config
         else:
-            self._hook_resolver = _default_hook_resolver
-
-        if user_config is not None:
-            self._user_config = user_config
-        else:
-            self._user_config = []
+            self._config = []
 
     def load(
         self,
@@ -120,22 +87,14 @@ class LoadingContext(ILoadingContext):
 
         return result
 
-    def is_defined(self, flag: str) -> bool:
-        return flag in self._flags
-
-    def get_fields(self, cls: Type[Any]) -> Dict[str, IBaseField]:
-        return self._field_resolver(cls)
-
-    def get_hook(self, obj: Any, name: str) -> Optional[Callable[..., None]]:
-        return self._hook_resolver(obj, name)
-
-    def get_user_config(self, config_type: Type[ConfigType]) -> ConfigType:
-        for item in self._user_config:
+    def get_config(self, config_type: Type[ConfigType]) -> ConfigType:
+        for item in self._config:
             if isinstance(item, config_type):
                 return item
-
-        assert False, "No user configuration object of the given type was found"
-        return None
+        
+        result = config_type()
+        self._config.append(config_type)
+        return result
 
     def current_node(self) -> Node:
         nodes = self._node_stack
@@ -238,24 +197,3 @@ class LoadingContext(ILoadingContext):
             found_handler = handler
 
         return found_handler
-
-
-def _default_field_resolver(cls: Type[Any]) -> Dict[str, IBaseField]:
-    if not hasattr(cls, 'fields'):
-        return {}
-
-    schema = getattr(cls, 'fields')
-    return cast(Dict[str, IBaseField], schema)
-
-
-def _default_hook_resolver(obj: Any, hook_name: str)\
-        -> Optional[Callable[..., None]]:
-    if not hasattr(obj, hook_name):
-        return None
-
-    hook = getattr(obj, hook_name)
-
-    if not callable(hook):
-        return None
-
-    return cast(Callable[..., Any], hook)

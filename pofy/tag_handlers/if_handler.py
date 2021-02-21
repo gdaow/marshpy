@@ -1,6 +1,8 @@
 """Handler loading a value only if some flag is defined."""
 from copy import copy
 from typing import Any
+from typing import Iterable
+from typing import Optional
 
 from pofy.core.constants import UNDEFINED
 from pofy.core.interfaces import IBaseField
@@ -16,6 +18,20 @@ class IfHandler(TagHandler):
 
     tag_pattern = r'^if\((?P<flag>[\w|_]*)\)$'
 
+    class Config:
+        """Shared configuration for all path handlers."""
+
+        def __init__(self, flags: Optional[Iterable[str]] = None) -> None:
+            """Initialize the config."""
+            if flags is not None:
+                self._flags = set(flags)
+            else:
+                self._flags = set()
+
+        def is_defined(self, flag: str) -> bool:
+            """Check that the given flag is defined."""
+            return flag in self._flags
+
     def load(self, context: ILoadingContext, field: IBaseField) \
             -> Any:
         node = context.current_node()
@@ -25,9 +41,10 @@ class IfHandler(TagHandler):
         # The pattern should match already if we're here
         assert match is not None
 
+        config = context.get_config(IfHandler.Config)
         flag = match.group('flag')
 
-        if not context.is_defined(flag):
+        if not config.is_defined(flag):
             return UNDEFINED
 
         # We need to return a copy of the node and erase the tag to avoid

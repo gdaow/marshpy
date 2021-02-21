@@ -3,6 +3,7 @@ from gettext import gettext as _
 from inspect import isclass
 from typing import Any
 from typing import Dict
+from typing import Callable
 from typing import Optional
 from typing import Set
 from typing import Type
@@ -17,6 +18,9 @@ from pofy.core.validation import ValidationContext
 from pofy.fields.base_field import BaseField
 from pofy.fields.string_field import StringField
 
+FieldsResolver = Callable[[Type[Any]], Dict[str, IBaseField]]
+HookResolver = Callable[[Any, str], Optional[Callable[..., None]]]
+TypeResolver = Callable[[str], Type[Any]]
 
 _TYPE_FORMAT_MSG = _("""\
 Type tag should be in the form !type:path.to.Type, got {}""")
@@ -24,6 +28,52 @@ Type tag should be in the form !type:path.to.Type, got {}""")
 
 class ObjectField(BaseField):
     """Object YAML object field."""
+
+    class Config:
+        """Shared configuration shared by all fields."""
+
+        def __init__(
+            self,
+            type_resolver: Optional[TypeResolver] = None,
+            fields_resolver: Optional[FieldsResolver] = None,
+            hook_resolver: Optional[HookResolver] = None,
+        ):
+            """Initialize the config class."""
+            self._type_resolver = type_resolver if type_resolver is not None else self._default_type_resolver
+            self._fields_resolver = fields_resolver if fields_resolver is not None else self._default_fields_resolver
+            self._hook_resolver = hook_resolver if hook_resolver is not None else self._default_hook_resolver
+
+        def get_fields(self, obj: Any) -> Dict[str, IBaseField]:
+            """Get fields for the given object."""
+            return self._fields_resolver(obj)
+
+        def get_hook(self, obj: Any, hook_name: str) -> Optional[Callable[..., None]]:
+            """Get hook of given name for given object."""
+            return self._hook_resolver(obj, hook_name)
+
+        @staticmethod
+        def _default_type_resolver(type_name: str) -> Type[Any]:
+            pass
+
+        @staticmethod
+        def _default_fields_resolver(object_class: Type[Any]) -> Dict[str, IBaseField]:
+            if not hasattr(object_class, 'fields'):
+                return {}
+
+            schema = getattr(object_class, 'fields')
+            return cast(Dict[str, IBaseField], schema)
+
+        @staticmethod
+        def _default_hook_resolver(obj: Any, hook_name: str) -> Optional[Callable[..., None]]:
+            if not hasattr(obj, hook_name):
+                return None
+
+            hook = getattr(obj, hook_name)
+
+            if not callable(hook):
+                return None
+
+            return cast(Callable[..., Any], hook)
 
     def __init__(
         self,
@@ -125,7 +175,8 @@ def _get_type(
 
 
 def _load(object_class: Type[Any], context: ILoadingContext) -> Any:
-    fields = _get_fields(object_class, context)
+    config = context.get_config(ObjectField.Config)
+    fields = _get_fields(object_class, config)
 
     if len(fields) == 0:
         context.error(
@@ -137,8 +188,11 @@ def _load(object_class: Type[Any], context: ILoadingContext) -> Any:
         return UNDEFINED
 
     result, set_fields = _load_object(object_class, fields, context)
-    if _validate_object(result, fields, set_fields, context):
-        _post_load(result, context)
+    if _validate_object(result, fields, set_fields, context, config):
+        post_load = config.get_hook(result, 'post_load')
+        if post_load is not None:
+            post_load()
+
         return result
 
     return UNDEFINED
@@ -181,7 +235,8 @@ def _validate_object(
     obj: Any,
     fields: Dict[str, IBaseField],
     set_fields: Set[str],
-    context: ILoadingContext
+    context: ILoadingContext,
+    config: ObjectField.Config
 ) -> bool:
     valid_object = True
     for name, field in fields.items():
@@ -192,7 +247,7 @@ def _validate_object(
                 _('Missing required field {}'), name
             )
 
-    hook = context.get_hook(obj, 'validate')
+    hook = config.get_hook(obj, 'validate')
 
     if hook is not None:
         validation_context = ValidationContext(context)
@@ -202,21 +257,14 @@ def _validate_object(
     return valid_object
 
 
-def _post_load(obj: Any, context: ILoadingContext) -> Any:
-    hook = context.get_hook(obj, 'post_load')
-
-    if hook is not None:
-        hook()
-
-
-def _get_fields(cls: Type[Any], context: ILoadingContext) \
-        -> Dict[str, IBaseField]:
+def _get_fields(cls: Type[Any], config: ObjectField.Config) -> Dict[str, IBaseField]:
     fields = {}
 
     for parent in cls.__bases__:
-        parent_fields = _get_fields(parent, context)
+        parent_fields = _get_fields(parent, config)
         fields.update(parent_fields)
 
-    fields.update(context.get_fields(cls))
+    class_fields = config.get_fields(cls)
+    fields.update(class_fields)
 
     return fields

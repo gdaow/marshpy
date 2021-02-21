@@ -16,6 +16,7 @@ from pofy.fields.list_field import ListField
 from pofy.fields.object_field import ObjectField
 from pofy.fields.string_field import StringField
 from pofy.loader import load
+from pofy.tag_handlers.path_handler import PathHandler
 
 from tests.helpers import FailTagHandler
 
@@ -44,7 +45,11 @@ def test_resolve_root_works(datadir: Path) -> None:
     test = load(
         'object_field: !import object.yaml\n',
         _Owner,
-        resolve_roots=[datadir]
+        config=[
+            PathHandler.Config(
+                roots=[datadir]
+            )
+        ]
     )
     assert isinstance(test, _Owner)
     assert isinstance(test.object_field, _Owned)
@@ -53,7 +58,11 @@ def test_resolve_root_works(datadir: Path) -> None:
     test = load(
         'object_list: !glob glob_directory/*.yaml\n',
         _Owner,
-        resolve_roots=[datadir]
+        config=[
+            PathHandler.Config(
+                roots=[datadir]
+            )
+        ]
     )
 
     assert isinstance(test, _Owner)
@@ -160,7 +169,11 @@ def test_schema_resolver_is_called() -> None:
     result = load(
         'string_field: value',
         object_class=_Object,
-        field_resolver=_field_resolver
+        config=[
+            ObjectField.Config(
+                fields_resolver=_field_resolver
+            )
+        ]
     )
 
     assert resolver_called

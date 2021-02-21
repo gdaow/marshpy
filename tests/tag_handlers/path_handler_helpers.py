@@ -28,8 +28,12 @@ def check_path_tag(
         field=ListField(StringField()),
         tag_handlers=[
             handler_type(
-                roots=[] if roots is None else roots,
                 allow_relative=allow_relative
+            )
+        ],
+        config=[
+            PathHandler.Config(
+                roots=[] if roots is None else roots,
             )
         ],
         location=str(location)
@@ -59,10 +63,12 @@ def check_path_tag_error(
         location=location,
         tag_handlers=[
             handler_type(
-                roots=[] if roots is None else roots,
                 allow_relative=allow_relative
             )
         ],
+        config=[
+            PathHandler.Config(roots)
+        ]
     )
 
     assert result == expected_value

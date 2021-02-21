@@ -5,6 +5,7 @@ from pathlib import Path
 from typing import Any
 from typing import Iterable
 from typing import Iterator
+from typing import List
 from typing import Optional
 from typing import cast
 
@@ -19,15 +20,38 @@ from pofy.tag_handlers.tag_handler import TagHandler
 
 
 class PathHandler(TagHandler):
-    """Base class for handlers that handle pathes relative to root directories.
+    """Base class for handlers that handle paths relative to root directories.
 
     Allow getting root directories, either from a given list, or relatively to
     the current loaded YAML document, if possible.
     """
 
+    class Config:
+        """Shared configuration for all path handlers."""
+
+        def __init__(self, roots: Optional[Iterable[Path]] = None):
+            """Initialize the config.
+
+            Args:
+                roots:      Base filesystem paths used to resolve paths in handlers inheriting from PathHandler.
+
+            """
+            if roots is not None:
+                for root_it in roots:
+                    assert isinstance(root_it, Path), \
+                        _('roots must be a list of Path objects')
+
+                self._roots = list(roots)
+            else:
+                self._roots = []
+
+        @property
+        def roots(self) -> List[Path]:
+            """Get the configured root paths."""
+            return self._roots
+
     def __init__(
         self,
-        roots: Optional[Iterable[Path]] = None,
         allow_relative: bool = True
     ):
         """Initialize the PathHandler.
@@ -39,15 +63,6 @@ class PathHandler(TagHandler):
 
         """
         super().__init__()
-
-        self._roots = None
-
-        if roots is not None:
-            for root_it in roots:
-                assert isinstance(root_it, Path), \
-                    _('roots must be a list of Path objects')
-
-            self._roots = list(roots)
 
         self._allow_relative = allow_relative
 
@@ -65,8 +80,9 @@ class PathHandler(TagHandler):
                 if parent.is_dir():
                     yield parent
 
-        if self._roots is not None:
-            for root in self._roots:
+        config = context.get_config(PathHandler.Config)
+        if config is not None:
+            for root in config.roots:
                 yield root
 
     @staticmethod

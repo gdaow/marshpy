@@ -2,13 +2,11 @@
 from gettext import gettext as _
 from inspect import isclass
 from io import TextIOBase
-from pathlib import Path
 from typing import Any
 from typing import IO
 from typing import Iterable
 from typing import List
 from typing import Optional
-from typing import Set
 from typing import Type
 from typing import TypeVar
 from typing import Union
@@ -19,8 +17,6 @@ from yaml import compose
 from pofy.core.constants import LoadResult
 from pofy.core.constants import UNDEFINED
 from pofy.core.errors import ErrorHandler
-from pofy.core.loading_context import FieldResolver
-from pofy.core.loading_context import HookResolver
 from pofy.core.loading_context import LoadingContext
 from pofy.fields.base_field import BaseField
 from pofy.fields.bool_field import BoolField
@@ -51,14 +47,10 @@ ObjectType = TypeVar('ObjectType')
 def load( # pylint: disable=too-many-locals
     source: Union[str, IO[str]],
     object_class: Optional[Type[ObjectType]] = None,
-    resolve_roots: Optional[Iterable[Path]] = None,
     tag_handlers: Optional[Iterable[TagHandler]] = None,
     error_handler: Optional[ErrorHandler] = None,
     root_field: Optional[BaseField] = None,
-    flags: Optional[Set[str]] = None,
-    field_resolver: Optional[FieldResolver] = None,
-    hook_resolver: Optional[HookResolver] = None,
-    user_config: Optional[List[Any]] = None
+    config: Optional[List[Any]] = None
 ) -> LoadResult[ObjectType]:
     """Deserialize a YAML file, stream or string into an object.
 
@@ -68,8 +60,6 @@ def load( # pylint: disable=too-many-locals
         object_class :      Class of the object to create. It will infer the
                             root field to use from this type (Scalar, list,
                             dictionary, or object).
-        resolve_roots:      Base filesystem paths used to resolve !import and
-                            !glob tags.
         tag_handlers :      Custom TagHandlers.
         error_handler :     Called with arguments (node, error_message) when an
                             error occurs. If it's not specified, a PofyError
@@ -88,9 +78,9 @@ def load( # pylint: disable=too-many-locals
                             the given object, or None if not found. By default,
                             it will search for an instance method named like the
                             hook on the given object.
-        user_config:        List of objects used to eventually configure custom
+        config:             List of objects used to eventually configure custom
                             fields, that will be retrievable through the
-                            get_user_config method.
+                            get_config method.
 
     """
     # This fails with pyfakefs, no simple way to check this, so disable it for
@@ -98,18 +88,18 @@ def load( # pylint: disable=too-many-locals
     # assert isinstance(source, (str, TextIOBase)), \
     #     _('source parameter must be a string or Text I/O.')
 
-    all_tag_handlers: List[TagHandler] = []
+    all_tag_handlers: List[TagHandler] = [
+        ImportHandler(),
+        GlobHandler(),
+        EnvHandler(),
+        IfHandler(),
+    ]
 
     if tag_handlers is not None:
         for handler_it in tag_handlers:
             assert isinstance(handler_it, TagHandler), \
                 _('tag_handlers items should be subclasses of TagHandler')
         all_tag_handlers.extend(tag_handlers)
-
-    all_tag_handlers.append(ImportHandler(resolve_roots))
-    all_tag_handlers.append(GlobHandler(resolve_roots))
-    all_tag_handlers.append(EnvHandler())
-    all_tag_handlers.append(IfHandler())
 
     if error_handler is not None:
         assert callable(error_handler), \
@@ -118,10 +108,7 @@ def load( # pylint: disable=too-many-locals
     context = LoadingContext(
         error_handler=error_handler,
         tag_handlers=all_tag_handlers,
-        flags=flags,
-        field_resolver=field_resolver,
-        hook_resolver=hook_resolver,
-        user_config=user_config
+        config=config
     )
 
     if root_field is None:
