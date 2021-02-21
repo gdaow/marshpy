@@ -91,7 +91,7 @@ class LoadingContext(ILoadingContext):
         for item in self._config:
             if isinstance(item, config_type):
                 return item
-        
+
         result = config_type()
         self._config.append(config_type)
         return result
