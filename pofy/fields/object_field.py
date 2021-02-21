@@ -144,15 +144,6 @@ class ObjectField(BaseField):
 def _load(object_class: Type[Any], context: ILoadingContext, config: ObjectField.Config) -> Any:
     fields = _get_fields(object_class, config)
 
-    if len(fields) == 0:
-        context.error(
-            ErrorCode.SCHEMA_ERROR,
-            _('No Schema class found for type {}, check that your schema is '
-              'correctly configured.'),
-            object_class.__name__
-        )
-        return UNDEFINED
-
     node = context.current_node()
     result = object_class()
     set_fields = set()
