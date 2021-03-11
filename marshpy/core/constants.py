@@ -1,4 +1,4 @@
-"""Pofy common definitions."""
+"""MarshPy common definitions."""
 from typing import TypeVar
 from typing import Union
 

@@ -2,13 +2,13 @@
 from typing import Any
 from typing import Optional
 
-from pofy.core.constants import UNDEFINED
-from pofy.core.errors import ErrorCode
-from pofy.fields.base_field import BaseField
-from pofy.fields.dict_field import DictField
-from pofy.fields.list_field import ListField
-from pofy.fields.string_field import StringField
-from pofy.tag_handlers.merge_handler import MergeHandler
+from marshpy.core.constants import UNDEFINED
+from marshpy.core.errors import ErrorCode
+from marshpy.fields.base_field import BaseField
+from marshpy.fields.dict_field import DictField
+from marshpy.fields.list_field import ListField
+from marshpy.fields.string_field import StringField
+from marshpy.tag_handlers.merge_handler import MergeHandler
 
 from tests.helpers import check_load
 

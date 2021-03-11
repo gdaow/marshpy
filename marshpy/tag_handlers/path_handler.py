@@ -13,10 +13,10 @@ from yaml import Node
 from yaml import compose
 from yaml.parser import ParserError
 
-from pofy.core.errors import ErrorCode
-from pofy.core.interfaces import IBaseField
-from pofy.core.interfaces import ILoadingContext
-from pofy.tag_handlers.tag_handler import TagHandler
+from marshpy.core.errors import ErrorCode
+from marshpy.core.interfaces import IBaseField
+from marshpy.core.interfaces import ILoadingContext
+from marshpy.tag_handlers.tag_handler import TagHandler
 
 
 class PathHandler(TagHandler):
@@ -87,7 +87,7 @@ class PathHandler(TagHandler):
 
     @staticmethod
     def _load_file(context: ILoadingContext, path: Path) -> Optional[Node]:
-        """Load a YAML document, emit a PofyError on ParseError."""
+        """Load a YAML document, emit a MarshPyError on ParseError."""
         with open(path, 'r') as yaml_file:
             try:
                 return cast(Node, compose(yaml_file)) # type: ignore

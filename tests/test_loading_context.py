@@ -5,13 +5,13 @@ from pytest import raises
 from yaml import Node
 from yaml.error import Mark
 
-from pofy.core.errors import ErrorCode
-from pofy.core.errors import PofyValueError
-from pofy.core.interfaces import IBaseField
-from pofy.core.interfaces import ILoadingContext
-from pofy.core.loading_context import LoadingContext
-from pofy.fields.base_field import BaseField
-from pofy.tag_handlers.tag_handler import TagHandler
+from marshpy.core.errors import ErrorCode
+from marshpy.core.errors import MarshPyValueError
+from marshpy.core.interfaces import IBaseField
+from marshpy.core.interfaces import ILoadingContext
+from marshpy.core.loading_context import LoadingContext
+from marshpy.fields.base_field import BaseField
+from marshpy.tag_handlers.tag_handler import TagHandler
 
 from tests.helpers import check_load
 
@@ -24,7 +24,7 @@ def test_loading_context_raises() -> None:
         def _load(self, context: ILoadingContext) -> None:
             context.error(ErrorCode.VALUE_ERROR, 'Test message')
 
-    with raises(PofyValueError):
+    with raises(MarshPyValueError):
         context.load(_RaisingField(), _get_dummy_node())
 
 

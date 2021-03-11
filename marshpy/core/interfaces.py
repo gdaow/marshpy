@@ -1,4 +1,4 @@
-"""Pofy common definitions."""
+"""MarshPy common definitions."""
 from abc import abstractmethod
 from typing import Any
 from typing import Optional
@@ -7,7 +7,7 @@ from typing import TypeVar
 
 from yaml import Node
 
-from pofy.core.errors import ErrorCode
+from marshpy.core.errors import ErrorCode
 
 
 ConfigType = TypeVar('ConfigType')

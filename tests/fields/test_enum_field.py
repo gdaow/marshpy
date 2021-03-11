@@ -1,8 +1,8 @@
 """String field tests."""
 from enum import Enum
 
-from pofy.core.errors import ErrorCode
-from pofy.fields.enum_field import EnumField
+from marshpy.core.errors import ErrorCode
+from marshpy.fields.enum_field import EnumField
 
 from tests.helpers import check_field
 from tests.helpers import check_field_error

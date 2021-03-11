@@ -1,8 +1,8 @@
 """String field tests."""
 from typing import Optional
 
-from pofy.core.errors import ErrorCode
-from pofy.fields.bool_field import BoolField
+from marshpy.core.errors import ErrorCode
+from marshpy.fields.bool_field import BoolField
 
 from tests.helpers import check_field
 from tests.helpers import check_field_error

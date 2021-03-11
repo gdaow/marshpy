@@ -8,8 +8,8 @@ from .core.errors import FieldNotDeclaredError
 from .core.errors import ImportNotFoundError
 from .core.errors import MissingRequiredFieldError
 from .core.errors import MultipleMatchingHandlersError
-from .core.errors import PofyError
-from .core.errors import PofyValueError
+from .core.errors import MarshPyError
+from .core.errors import MarshPyValueError
 from .core.errors import SchemaError
 from .core.errors import TypeResolveError
 from .core.errors import UnexpectedNodeTypeError

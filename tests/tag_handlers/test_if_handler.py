@@ -1,9 +1,9 @@
 """If tag handler tests."""
-from pofy.core.constants import UNDEFINED
-from pofy.fields.dict_field import DictField
-from pofy.fields.list_field import ListField
-from pofy.fields.string_field import StringField
-from pofy.tag_handlers.if_handler import IfHandler
+from marshpy.core.constants import UNDEFINED
+from marshpy.fields.dict_field import DictField
+from marshpy.fields.list_field import ListField
+from marshpy.fields.string_field import StringField
+from marshpy.tag_handlers.if_handler import IfHandler
 
 from tests.helpers import check_load
 

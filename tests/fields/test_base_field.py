@@ -1,7 +1,7 @@
 """Yaml object loading tests."""
-from pofy.core.errors import ErrorCode
-from pofy.core.validation import ValidationContext
-from pofy.fields.string_field import StringField
+from marshpy.core.errors import ErrorCode
+from marshpy.core.validation import ValidationContext
+from marshpy.fields.string_field import StringField
 
 from tests.helpers import check_field_error
 

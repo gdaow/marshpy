@@ -10,8 +10,8 @@ from typing import Any
 
 from yaml import Node
 
-from pofy.core.interfaces import IBaseField
-from pofy.core.interfaces import ILoadingContext
+from marshpy.core.interfaces import IBaseField
+from marshpy.core.interfaces import ILoadingContext
 
 
 class TagHandler(ABC):

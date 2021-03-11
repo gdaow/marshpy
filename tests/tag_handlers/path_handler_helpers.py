@@ -5,11 +5,11 @@ from typing import List
 from typing import Optional
 from typing import Type
 
-from pofy.core.constants import UNDEFINED
-from pofy.core.errors import ErrorCode
-from pofy.fields.list_field import ListField
-from pofy.fields.string_field import StringField
-from pofy.tag_handlers.path_handler import PathHandler
+from marshpy.core.constants import UNDEFINED
+from marshpy.core.errors import ErrorCode
+from marshpy.fields.list_field import ListField
+from marshpy.fields.string_field import StringField
+from marshpy.tag_handlers.path_handler import PathHandler
 
 from tests.helpers import check_load
 

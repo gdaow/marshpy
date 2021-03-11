@@ -1,23 +1,23 @@
-# Pofy (Python yaml objects)
+# MarshPy (Python yaml objects)
 
-[![WTFPL license](https://img.shields.io/badge/License-WTFPL-blue.svg)](https://raw.githubusercontent.com/an-otter-world/pofy/master/COPYING)
-[![Actions Status](https://github.com/an-otter-world/pofy/workflows/Checks/badge.svg)](https://github.com/an-otter-world/pofy/actions)
-[![Coverage Status](https://coveralls.io/repos/github/an-otter-world/pofy/badge.svg)](https://coveralls.io/github/an-otter-world/pofy)
-[![Matrix](https://img.shields.io/matrix/python-pofy:matrix.org?server_fqdn=matrix.org)](https://matrix.to/#/!SwCyFpSTQTLiPCNKTO:matrix.org?via=matrix.org)
+[![WTFPL license](https://img.shields.io/badge/License-WTFPL-blue.svg)](https://raw.githubusercontent.com/an-otter-world/marshpy/master/COPYING)
+[![Actions Status](https://github.com/an-otter-world/marshpy/workflows/Checks/badge.svg)](https://github.com/an-otter-world/marshpy/actions)
+[![Coverage Status](https://coveralls.io/repos/github/an-otter-world/marshpy/badge.svg)](https://coveralls.io/github/an-otter-world/marshpy)
+[![Matrix](https://img.shields.io/matrix/python-marshpy:matrix.org?server_fqdn=matrix.org)](https://matrix.to/#/!SwCyFpSTQTLiPCNKTO:matrix.org?via=matrix.org)
 
-Pofy is a tiny library on top of PyYAML, allowing to add semantic on top of YAML
+MarshPy is a tiny library on top of PyYAML, allowing to add semantic on top of YAML
 and deserialize python object with data validation, custom field types, custom
 deserialization behaviors with YAML tags, YAML file inclusion from other
-files... Pofy was designed to allow easy declaration and utilisation of complex
+files... MarshPy was designed to allow easy declaration and utilisation of complex
 configurations in python.
 
-Pofy is distributed under the term of the WTFPL V2 (See COPYING file).
+MarshPy is distributed under the term of the WTFPL V2 (See COPYING file).
 
 Contribution are very welcome. Don't hesitate to send pull requests. As English
 isn't my native language, I'd be very happy with documentation correction or
-improvements. Feel free to join [the Pofy channel on Matrix](https://matrix.to/#/!SwCyFpSTQTLiPCNKTO:matrix.org?via=matrix.org).
+improvements. Feel free to join [the MarshPy channel on Matrix](https://matrix.to/#/!SwCyFpSTQTLiPCNKTO:matrix.org?via=matrix.org).
 
-- [Pofy (Python yaml objects)](#pofy-python-yaml-objects)
+- [MarshPy (Python yaml objects)](#marshpy-python-yaml-objects)
   - [Installation](#installation)
   - [Quickstart](#quickstart)
   - [Reference](#reference)
@@ -50,9 +50,9 @@ improvements. Feel free to join [the Pofy channel on Matrix](https://matrix.to/#
 
 ## Installation
 
-Pofy is tested with Python 3.6 through 3.9. It can be installed through pip :
+MarshPy is tested with Python 3.6 through 3.9. It can be installed through pip :
 
-  `pip install pofy`
+  `pip install marshpy`
 
 ## Quickstart
 
@@ -60,7 +60,7 @@ The following minimum code declares a deserializable object and loads it from
 a YAML document :
 
   ```python
-      from pofy import StringField, load
+      from marshpy import StringField, load
 
       class Test:
           fields = {
@@ -85,7 +85,7 @@ a 'fields' class variable, which is expected to be a (string, field) dictionary.
 Keys of the dictionary are the name of the field, i.e the name of the member
 variable set on the loaded objects.
 
-Pofy comes with predefined fields described in the following sections. You can
+MarshPy comes with predefined fields described in the following sections. You can
 declare custom fields, to do so, refer to the [custom Fields][#custom-fields]
 section.
 
@@ -99,7 +99,7 @@ All field types accept the following parameters :
   it will be called with the corresponding error code.
 
   ```python
-    from pofy import StringField, load
+    from marshpy import StringField, load
 
     class Test:
         fields = {
@@ -118,7 +118,7 @@ All field types accept the following parameters :
   [Object Validation](#object-validation)).
 
   ```python
-    from pofy import StringField, load
+    from marshpy import StringField, load
   
     def _validate(context, value):
       if value not in ['red', 'black']:
@@ -146,7 +146,7 @@ Any other value will raise a ValueError or, if you defined a
 corresponding error code.
 
 ```python
-  from pofy import BoolField, load
+  from marshpy import BoolField, load
 
   class Test:
     fields = {
@@ -170,7 +170,7 @@ constructor parameters :
   with the corresponding error code.
 
 ```python
-  from pofy import StringField, load
+  from marshpy import StringField, load
 
   class Person:
     fields = {
@@ -203,7 +203,7 @@ it accept several parameters :
   ErrorCode.VALIDATION_ERROR as the error_code parameter.
 
 ```python
-  from pofy import IntField, load
+  from marshpy import IntField, load
 
   class Test:
     class Schema:
@@ -228,7 +228,7 @@ parameters, it accept several specific ones :
   ErrorCode.VALIDATION_ERROR as the error_code parameter.
 
 ```python
-  from pofy import FloatField, load
+  from marshpy import FloatField, load
 
   class Test:
     class Schema:
@@ -252,7 +252,7 @@ will be called with ErrorCode.VALIDATION_ERROR as the error_code parameter.
 
 ```python
   from enum import Enum
-  from pofy import EnumField, load
+  from marshpy import EnumField, load
 
   class TestEnum(Enum):
     VALUE_1 = 1
@@ -277,13 +277,13 @@ common fields parameters, it accept the following specific one :
   ErrorCode.VALIDATION_ERROR as the error_code parameter.
 
 If the path in the YAML document is relative, and doesn't exists relatively to
-the current working dir, Pofy will try to resolve it relatively to the current
+the current working dir, MarshPy will try to resolve it relatively to the current
 deserialized YAML file's directory (if it's a file that's being deserialized and
 not, say, a string).
 
 ```python
   from pathlib import Path
-  from pofy import PathField, load
+  from marshpy import PathField, load
 
   class Test:
     class Schema:
@@ -320,7 +320,7 @@ following specific one :
   provided in YAML through the !type tag.
 
 ```python
-  from pofy import ObjectField, StringField, load
+  from marshpy import ObjectField, StringField, load
 
   class Child:
     class Schema:
@@ -367,7 +367,7 @@ Here is an example of how should be declared the schema of an object having a
 list of another object as member :
 
 ```python
-  from pofy import ListField, ObjectField, load
+  from marshpy import ListField, ObjectField, load
 
   class Child:
     class Schema:
@@ -405,7 +405,7 @@ Here is an example of how should be declared the schema of an object having a
 dictionary of another object as member :
 
 ```python
-  from pofy import DictField, ObjectField, load
+  from marshpy import DictField, ObjectField, load
 
   class Child:
     class Schema:
@@ -445,7 +445,7 @@ objects declared in a third-party library. Here is an example of a
 schema_resolver searching in a dictionnary to resolve schemas.
 
 ```python
-  from pofy import load, StringField
+  from marshpy import load, StringField
 
   class Class:
     pass
@@ -470,7 +470,7 @@ schema_resolver searching in a dictionnary to resolve schemas.
 
 #### Object Validation
 
-When an object is loaded by Pofy, if a 'validate' class method is defined on the
+When an object is loaded by MarshPy, if a 'validate' class method is defined on the
 Schema class, it will be called with a ValidationContext and the deserialized
 object as arguments. The ValidationContext exposes the following methods :
 
@@ -490,7 +490,7 @@ first validation error, so be aware of that when writing validation methods.
 Here is an example of the declaration of a validation method :
 
 ```python
-  from pofy import StringField, ValidationContext
+  from marshpy import StringField, ValidationContext
 
   class Test:
     class Schema:
@@ -510,7 +510,7 @@ a 'post_load' method will be called if it exists on the Schema class upon
 object loading. The only argument will be the deserialized object :
 
 ```python
-  from pofy import StringField
+  from marshpy import StringField
 
   class Test:
     class Schema:
@@ -525,7 +525,7 @@ object loading. The only argument will be the deserialized object :
 ### Tag Handlers
 
 Tag handlers are custom deserialization behaviors that are triggered when 
-encountering specific YAML tags. Pofy comes with some predefined tag handlers
+encountering specific YAML tags. MarshPy comes with some predefined tag handlers
 that are automatically registered when calling load, so the following tags are
 usable out of the box :
 
@@ -533,7 +533,7 @@ usable out of the box :
 
 The env tag can be set on a YAML string value, and will load the value of the
 environment variable named like the tagged string. If the environment variable
-isn't set, the Pofy field will not be set either, allowing to eventually
+isn't set, the MarshPy field will not be set either, allowing to eventually
 fallback on a default value (see [first-of](#first-of) for example).
 
 If this tag is set on another value than a YAML scalar value, an
@@ -542,7 +542,7 @@ UnexpectedNodeTypeError will be raised, or the defined
 ErrorCode.UNEXPECTED_NODE_TYPE as the error_code parameter.
 
 ```python
-  from pofy import StringField, load
+  from marshpy import StringField, load
 
   class Test:
     class Schema:
@@ -573,7 +573,7 @@ ErrorCode.UNEXPECTED_NODE_TYPE as the error_code parameter.
 
 ```python
 
-  from pofy import StringField, load
+  from marshpy import StringField, load
 
   class Test:
     class Schema:
@@ -596,7 +596,7 @@ ErrorCode.UNEXPECTED_NODE_TYPE as the error_code parameter.
 The glob tag can be set on a YAML string value, and will load all the YAML
 documents that matches the tagged pattern as a YAML list. The pattern is
 relatively to all configured roots (see below), and the current YAML document
-directory, if the YAML is loaded from a file. The Pofy load method accepts a
+directory, if the YAML is loaded from a file. The MarshPy load method accepts a
 'resolve_roots' arguments, as a list of path that glob and [import](#import)
 tags should use as root when searching for files.
 
@@ -607,7 +607,7 @@ ErrorCode.UNEXPECTED_NODE_TYPE as the error_code parameter.
 
 ```python
 
-  from pofy import StringField, ListField, ObjectField, load
+  from marshpy import StringField, ListField, ObjectField, load
 
   class Child:
     class Schema:
@@ -640,13 +640,13 @@ ErrorCode.UNEXPECTED_NODE_TYPE as the error_code parameter.
 #### if
 
 The 'if' tag can be set on any YAML value, and will load the tagged node only
-if the given flag was defined, through the 'flags' parameter of the Pofy load
+if the given flag was defined, through the 'flags' parameter of the MarshPy load
 method. If the flag is not defined, the field will not be set at all. This tag
 is usefull in conjonction with the [first-of](#first-of) tag.
 
 ```python
 
-  from pofy import StringField
+  from marshpy import StringField
 
   class Test:
     class Schema:
@@ -665,7 +665,7 @@ is usefull in conjonction with the [first-of](#first-of) tag.
 The import and try-import tags can be set on a YAML string value, and will load
 the given YAML document as the field value. The file path is evaluated
 relatively to all configured roots (see below), and the current YAML document
-directory, if the YAML is loaded from a file. The Pofy load method accepts a
+directory, if the YAML is loaded from a file. The MarshPy load method accepts a
 'resolve_roots' arguments, as a list of path that import and [glob](#glob)
 tags use as root when searching for files. If a file matching the given path
 cannot be found relatively (if the pass is relative) to the current YAML
@@ -681,7 +681,7 @@ ErrorCode.UNEXPECTED_NODE_TYPE as the error_code parameter.
 
 ```python
 
-  from pofy import StringField, ListField, ObjectField, load
+  from marshpy import StringField, ListField, ObjectField, load
 
   class Child:
     class Schema:
@@ -711,7 +711,7 @@ of all the item in the list, as a dictionnary or list.
 
 ```python
 
-  from pofy import StringField, ListField, load
+  from marshpy import StringField, ListField, load
 
   class Parent:
     class Schema:
@@ -730,16 +730,16 @@ of all the item in the list, as a dictionnary or list.
 
 #### Custom Tag Handlers
 
-Pofy allows you to plug custom deserialization behavior when encountering some
+MarshPy allows you to plug custom deserialization behavior when encountering some
 YAML tags, matching a given regular expression. These custom behaviors are
 called tag handlers, and are declared this way tag handlers are defined the
 following way :
 
 ```python
 
-from pofy import TagHandler
-from pofy import ILoadingContext
-from pofy import IBaseField
+from marshpy import TagHandler
+from marshpy import ILoadingContext
+from marshpy import IBaseField
 
 class ReverseHandler(TagHandler):
     tag_pattern = '^reverse$' # Regex pattern that this tag handler matches
@@ -761,7 +761,7 @@ class ReverseHandler(TagHandler):
 Check the API reference to see the methods available on ILoadingContext and
 IBaseField, representing the currently deserialized field.
 
-Before using it in YAML, the handler should be registered when calling the pofy
+Before using it in YAML, the handler should be registered when calling the marshpy
 'load' methods through the 'tag_handlers' arguments :
 
 ```python
@@ -785,10 +785,10 @@ Before using it in YAML, the handler should be registered when calling the pofy
 
 #### Custom Error Handling
 
-By default, Pofy will raise an exception when an error is encountered. This
+By default, MarshPy will raise an exception when an error is encountered. This
 behavior can be overrided by passing a callable as the 'error _handler'
 parameter of the load(...) function. this callable should accept a
-Pofy.ErrorCode and a string giving more information on the error. The error_code
+MarshPy.ErrorCode and a string giving more information on the error. The error_code
 parameter can be one of the following ErrorCode enum values :
 
  - BAD_TYPE_TAG_FORMAT :        A malformed [!type tag](#object-field) was

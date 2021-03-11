@@ -1,4 +1,4 @@
-"""Pofy installation configuration."""
+"""MarshPy installation configuration."""
 from pathlib import Path
 from re import compile as re_compile
 from subprocess import CalledProcessError
@@ -35,16 +35,16 @@ def get_git_version() -> str:
 
 
 setup(
-    name="pofy",
+    name="marshpy",
     description="Python Yaml Object deserializer based on PyYAML.",
     long_description=(Path(__file__).parent / "README.md").read_text(),
     long_description_content_type="text/markdown",
     version=get_git_version(),
     keywords=['YAML', 'serialization'],
     packages=[
-        'pofy',
-        'pofy.fields',
-        'pofy.tag_handlers'
+        'marshpy',
+        'marshpy.fields',
+        'marshpy.tag_handlers'
     ],
     license='WTFPL',
     classifiers=[
@@ -61,6 +61,6 @@ setup(
     install_requires=['pyyaml'],
     author="An Otter World",
     author_email="an-otter-world@ki-dour.org",
-    url="http://github.com/an-otter-world/pofy/",
+    url="http://github.com/an-otter-world/marshpy/",
     zip_safe=False,
 )

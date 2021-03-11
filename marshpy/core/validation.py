@@ -3,8 +3,8 @@ from typing import Any
 from typing import Optional
 from typing import Callable
 
-from pofy.core.errors import ErrorCode
-from pofy.core.interfaces import ILoadingContext
+from marshpy.core.errors import ErrorCode
+from marshpy.core.interfaces import ILoadingContext
 
 
 ValidateCallback = Callable[['ValidationContext', Any], None]

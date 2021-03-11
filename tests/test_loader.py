@@ -8,15 +8,15 @@ from typing import Type
 
 from yaml import Node
 
-from pofy.core.constants import UNDEFINED
-from pofy.core.errors import ErrorCode
-from pofy.core.interfaces import IBaseField
-from pofy.core.interfaces import ILoadingContext
-from pofy.fields.list_field import ListField
-from pofy.fields.object_field import ObjectField
-from pofy.fields.string_field import StringField
-from pofy.loader import load
-from pofy.tag_handlers.path_handler import PathHandler
+from marshpy.core.constants import UNDEFINED
+from marshpy.core.errors import ErrorCode
+from marshpy.core.interfaces import IBaseField
+from marshpy.core.interfaces import ILoadingContext
+from marshpy.fields.list_field import ListField
+from marshpy.fields.object_field import ObjectField
+from marshpy.fields.string_field import StringField
+from marshpy.loader import load
+from marshpy.tag_handlers.path_handler import PathHandler
 
 from tests.helpers import FailTagHandler
 

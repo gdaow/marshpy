@@ -5,10 +5,10 @@ from typing import Optional
 
 from yaml import ScalarNode
 
-from pofy.core.constants import UNDEFINED
-from pofy.core.interfaces import ILoadingContext
-from pofy.core.validation import ValidateCallback
-from pofy.fields.base_field import BaseField
+from marshpy.core.constants import UNDEFINED
+from marshpy.core.interfaces import ILoadingContext
+from marshpy.core.validation import ValidateCallback
+from marshpy.fields.base_field import BaseField
 
 
 class DictField(BaseField):

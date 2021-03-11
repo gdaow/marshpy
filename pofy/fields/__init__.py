@@ -1,1 +1,0 @@
-"""Pofy field types package."""

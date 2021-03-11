@@ -4,15 +4,15 @@ from gettext import gettext as _
 from typing import Any
 from typing import Optional
 
-from pofy.core.constants import UNDEFINED
-from pofy.core.interfaces import IBaseField
-from pofy.core.interfaces import ILoadingContext
-from pofy.core.validation import ValidateCallback
-from pofy.core.validation import ValidationContext
+from marshpy.core.constants import UNDEFINED
+from marshpy.core.interfaces import IBaseField
+from marshpy.core.interfaces import ILoadingContext
+from marshpy.core.validation import ValidateCallback
+from marshpy.core.validation import ValidationContext
 
 
 class BaseField(IBaseField):
-    """Base class for all Pofy fields."""
+    """Base class for all MarshPy fields."""
 
     def __init__(
         self,

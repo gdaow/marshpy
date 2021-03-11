@@ -9,14 +9,14 @@ from typing import Set
 from typing import Type
 from typing import cast
 
-from pofy.core.constants import UNDEFINED
-from pofy.core.errors import ErrorCode
-from pofy.core.interfaces import IBaseField
-from pofy.core.interfaces import ILoadingContext
-from pofy.core.validation import ValidateCallback
-from pofy.core.validation import ValidationContext
-from pofy.fields.base_field import BaseField
-from pofy.fields.string_field import StringField
+from marshpy.core.constants import UNDEFINED
+from marshpy.core.errors import ErrorCode
+from marshpy.core.interfaces import IBaseField
+from marshpy.core.interfaces import ILoadingContext
+from marshpy.core.validation import ValidateCallback
+from marshpy.core.validation import ValidationContext
+from marshpy.fields.base_field import BaseField
+from marshpy.fields.string_field import StringField
 
 FieldsResolver = Callable[[Type[Any]], Dict[str, IBaseField]]
 HookResolver = Callable[[Any, str], Optional[Callable[..., None]]]

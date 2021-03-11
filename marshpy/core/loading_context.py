@@ -12,13 +12,13 @@ from yaml import Node
 from yaml import ScalarNode
 from yaml import SequenceNode
 
-from pofy.core.errors import ErrorCode
-from pofy.core.errors import ErrorHandler
-from pofy.core.errors import get_exception_type
-from pofy.core.interfaces import ConfigType
-from pofy.core.interfaces import IBaseField
-from pofy.core.interfaces import ILoadingContext
-from pofy.tag_handlers.tag_handler import TagHandler
+from marshpy.core.errors import ErrorCode
+from marshpy.core.errors import ErrorHandler
+from marshpy.core.errors import get_exception_type
+from marshpy.core.interfaces import ConfigType
+from marshpy.core.interfaces import IBaseField
+from marshpy.core.interfaces import ILoadingContext
+from marshpy.tag_handlers.tag_handler import TagHandler
 
 
 NodeStack = List[Tuple[Node, Optional[str]]]
@@ -37,7 +37,7 @@ class LoadingContext(ILoadingContext):
 
         Args:
             error_handler : Called with arguments (node, error_message) when an error occurs. If it's not specified, a
-                            PofyError will be raised when an error occurs. (see errors.py)
+                            MarshPyError will be raised when an error occurs. (see errors.py)
             tag_handlers :  Tag handlers used to apply custom behaviors when encountering YAML tags.
             config:         List of objects used to eventually configure fields and tag handlers, that will be
                             retrievable through the get_config method.

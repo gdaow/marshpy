@@ -4,24 +4,24 @@ from typing import Type
 from yaml import Node
 from yaml.error import Mark
 
-from pofy.core.errors import BadTypeFormatError
-from pofy.core.errors import ErrorCode
-from pofy.core.errors import FieldNotDeclaredError
-from pofy.core.errors import ImportNotFoundError
-from pofy.core.errors import MissingRequiredFieldError
-from pofy.core.errors import MultipleMatchingHandlersError
-from pofy.core.errors import PofyError
-from pofy.core.errors import PofyValueError
-from pofy.core.errors import SchemaError
-from pofy.core.errors import TypeResolveError
-from pofy.core.errors import UnexpectedNodeTypeError
-from pofy.core.errors import ValidationError
-from pofy.core.errors import get_exception_type
+from marshpy.core.errors import BadTypeFormatError
+from marshpy.core.errors import ErrorCode
+from marshpy.core.errors import FieldNotDeclaredError
+from marshpy.core.errors import ImportNotFoundError
+from marshpy.core.errors import MissingRequiredFieldError
+from marshpy.core.errors import MultipleMatchingHandlersError
+from marshpy.core.errors import MarshPyError
+from marshpy.core.errors import MarshPyValueError
+from marshpy.core.errors import SchemaError
+from marshpy.core.errors import TypeResolveError
+from marshpy.core.errors import UnexpectedNodeTypeError
+from marshpy.core.errors import ValidationError
+from marshpy.core.errors import get_exception_type
 
 
 def test_get_exception_type_is_correct() -> None:
     """Test exception type returned by get_exception_type is correct."""
-    def _check(code: ErrorCode, exception: Type[PofyError]) -> None:
+    def _check(code: ErrorCode, exception: Type[MarshPyError]) -> None:
         assert get_exception_type(code) == exception
 
     _check(ErrorCode.BAD_TYPE_TAG_FORMAT, BadTypeFormatError)
@@ -30,7 +30,7 @@ def test_get_exception_type_is_correct() -> None:
     _check(ErrorCode.UNEXPECTED_NODE_TYPE, UnexpectedNodeTypeError)
     _check(ErrorCode.IMPORT_NOT_FOUND, ImportNotFoundError)
     _check(ErrorCode.TYPE_RESOLVE_ERROR, TypeResolveError)
-    _check(ErrorCode.VALUE_ERROR, PofyValueError)
+    _check(ErrorCode.VALUE_ERROR, MarshPyValueError)
     _check(ErrorCode.VALIDATION_ERROR, ValidationError)
     _check(ErrorCode.MULTIPLE_MATCHING_HANDLERS, MultipleMatchingHandlersError)
     _check(ErrorCode.SCHEMA_ERROR, SchemaError)
@@ -46,7 +46,7 @@ def test_exception_format() -> None:
     )
 
     message = 'Error message'
-    error = PofyError(node, message)
+    error = MarshPyError(node, message)
 
     location_string = '{}:{}:{}'.format('file_name', 10, 42)
 

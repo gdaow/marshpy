@@ -1,4 +1,4 @@
-"""Pofy deserializing function."""
+"""MarshPy deserializing function."""
 from gettext import gettext as _
 from inspect import isclass
 from io import TextIOBase
@@ -14,23 +14,23 @@ from typing import cast
 
 from yaml import compose
 
-from pofy.core.constants import LoadResult
-from pofy.core.constants import UNDEFINED
-from pofy.core.errors import ErrorHandler
-from pofy.core.loading_context import LoadingContext
-from pofy.fields.base_field import BaseField
-from pofy.fields.bool_field import BoolField
-from pofy.fields.dict_field import DictField
-from pofy.fields.float_field import FloatField
-from pofy.fields.int_field import IntField
-from pofy.fields.list_field import ListField
-from pofy.fields.object_field import ObjectField
-from pofy.fields.string_field import StringField
-from pofy.tag_handlers.env_handler import EnvHandler
-from pofy.tag_handlers.glob_handler import GlobHandler
-from pofy.tag_handlers.if_handler import IfHandler
-from pofy.tag_handlers.import_handler import ImportHandler
-from pofy.tag_handlers.tag_handler import TagHandler
+from marshpy.core.constants import LoadResult
+from marshpy.core.constants import UNDEFINED
+from marshpy.core.errors import ErrorHandler
+from marshpy.core.loading_context import LoadingContext
+from marshpy.fields.base_field import BaseField
+from marshpy.fields.bool_field import BoolField
+from marshpy.fields.dict_field import DictField
+from marshpy.fields.float_field import FloatField
+from marshpy.fields.int_field import IntField
+from marshpy.fields.list_field import ListField
+from marshpy.fields.object_field import ObjectField
+from marshpy.fields.string_field import StringField
+from marshpy.tag_handlers.env_handler import EnvHandler
+from marshpy.tag_handlers.glob_handler import GlobHandler
+from marshpy.tag_handlers.if_handler import IfHandler
+from marshpy.tag_handlers.import_handler import ImportHandler
+from marshpy.tag_handlers.tag_handler import TagHandler
 
 _ROOT_FIELDS_MAPPING = {
     bool: BoolField(),
@@ -62,7 +62,7 @@ def load( # pylint: disable=too-many-locals
                             dictionary, or object).
         tag_handlers :      Custom TagHandlers.
         error_handler :     Called with arguments (node, error_message) when an
-                            error occurs. If it's not specified, a PofyError
+                            error occurs. If it's not specified, a MarshPyError
                             will be raised when an error occurs.
         root_field:         The field to use to load the root node. You can
                             specify a type (list, dict, one of the scalar types

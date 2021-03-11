@@ -1,9 +1,9 @@
 """Import handler tests."""
 from pathlib import Path
 
-from pofy.core.constants import UNDEFINED
-from pofy.core.errors import ErrorCode
-from pofy.tag_handlers.import_handler import ImportHandler
+from marshpy.core.constants import UNDEFINED
+from marshpy.core.errors import ErrorCode
+from marshpy.tag_handlers.import_handler import ImportHandler
 
 from tests.tag_handlers.path_handler_helpers import check_path_tag
 from tests.tag_handlers.path_handler_helpers import check_path_tag_error

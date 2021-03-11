@@ -1,4 +1,4 @@
-"""Pofy error handling related classes & definitions."""
+"""MarshPy error handling related classes & definitions."""
 from enum import Enum
 from typing import Callable
 from typing import Type
@@ -7,7 +7,7 @@ from yaml import Node
 
 
 class ErrorCode(Enum):
-    """Pofy error codes."""
+    """MarshPy error codes."""
 
     # Raised when a !type tag isn't correctly formed.
     BAD_TYPE_TAG_FORMAT = 1
@@ -43,7 +43,7 @@ class ErrorCode(Enum):
 ErrorHandler = Callable[[Node, ErrorCode, str], None]
 
 
-class PofyError(Exception):
+class MarshPyError(Exception):
     """Exception raised when errors occurs during object loading."""
 
     def __init__(self, node: Node, message: str):
@@ -55,7 +55,7 @@ class PofyError(Exception):
             message : The error description message.
 
         """
-        super().__init__(PofyError._get_message(node, message))
+        super().__init__(MarshPyError._get_message(node, message))
         self.node = node
 
     @staticmethod
@@ -70,43 +70,43 @@ class PofyError(Exception):
         )
 
 
-class BadTypeFormatError(PofyError):
+class BadTypeFormatError(MarshPyError):
     """Exception type raised for BAD_TYPE_FORMAT error code."""
 
 
-class FieldNotDeclaredError(PofyError):
+class FieldNotDeclaredError(MarshPyError):
     """Exception type raised for FIELD_NOT_DECLARED error code."""
 
 
-class MissingRequiredFieldError(PofyError):
+class MissingRequiredFieldError(MarshPyError):
     """Exception type raised for MISSING_REQUIRED_FIELD error code."""
 
 
-class UnexpectedNodeTypeError(PofyError):
+class UnexpectedNodeTypeError(MarshPyError):
     """Exception type raised for UNEXPECTED_NODE_TYPE error code."""
 
 
-class ImportNotFoundError(PofyError):
+class ImportNotFoundError(MarshPyError):
     """Exception type raised for IMPORT_NOT_FOUND error code."""
 
 
-class TypeResolveError(PofyError):
+class TypeResolveError(MarshPyError):
     """Exception type raised for TYPE_RESOLVE_ERROR error code."""
 
 
-class PofyValueError(PofyError):
+class MarshPyValueError(MarshPyError):
     """Exception type raised for VALUE_ERROR error code."""
 
 
-class ValidationError(PofyError):
+class ValidationError(MarshPyError):
     """Exception type raised for VALIDATION_ERROR error code."""
 
 
-class MultipleMatchingHandlersError(PofyError):
+class MultipleMatchingHandlersError(MarshPyError):
     """Exception type raised for MULTIPLE_MATCHING_HANDLER error code."""
 
 
-class SchemaError(PofyError):
+class SchemaError(MarshPyError):
     """Exception type raised for MULTIPLE_MATCHING_HANDLER error code."""
 
 
@@ -117,14 +117,14 @@ _CODE_TO_EXCEPTION_TYPE_MAPPING = {
     ErrorCode.UNEXPECTED_NODE_TYPE: UnexpectedNodeTypeError,
     ErrorCode.IMPORT_NOT_FOUND: ImportNotFoundError,
     ErrorCode.TYPE_RESOLVE_ERROR: TypeResolveError,
-    ErrorCode.VALUE_ERROR: PofyValueError,
+    ErrorCode.VALUE_ERROR: MarshPyValueError,
     ErrorCode.VALIDATION_ERROR: ValidationError,
     ErrorCode.MULTIPLE_MATCHING_HANDLERS: MultipleMatchingHandlersError,
     ErrorCode.SCHEMA_ERROR: SchemaError,
 }
 
 
-def get_exception_type(error_code: ErrorCode) -> Type[PofyError]:
+def get_exception_type(error_code: ErrorCode) -> Type[MarshPyError]:
     """Get exception type that should be raised for a given error code.
 
     Args:

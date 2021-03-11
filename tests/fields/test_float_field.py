@@ -1,6 +1,6 @@
 """Float field tests."""
-from pofy.core.errors import ErrorCode
-from pofy.fields.float_field import FloatField
+from marshpy.core.errors import ErrorCode
+from marshpy.fields.float_field import FloatField
 
 from tests.helpers import check_field
 from tests.helpers import check_field_error

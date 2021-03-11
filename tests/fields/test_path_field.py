@@ -1,8 +1,8 @@
 """Path field tests."""
 from pathlib import Path
 
-from pofy.core.errors import ErrorCode
-from pofy.fields.path_field import PathField
+from marshpy.core.errors import ErrorCode
+from marshpy.fields.path_field import PathField
 
 from tests.helpers import check_field
 from tests.helpers import check_field_error

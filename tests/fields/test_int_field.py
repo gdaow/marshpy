@@ -1,6 +1,6 @@
 """Integer field tests."""
-from pofy.core.errors import ErrorCode
-from pofy.fields.int_field import IntField
+from marshpy.core.errors import ErrorCode
+from marshpy.fields.int_field import IntField
 
 from tests.helpers import check_field
 from tests.helpers import check_field_error
