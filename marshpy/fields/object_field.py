@@ -18,9 +18,9 @@ from marshpy.core.validation import ValidationContext
 from marshpy.fields.base_field import BaseField
 from marshpy.fields.string_field import StringField
 
-FieldsResolver = Callable[[Type[Any]], Dict[str, IBaseField]]
+FieldsResolver = Callable[[Any], Dict[str, IBaseField]]
 HookResolver = Callable[[Any, str], Optional[Callable[..., None]]]
-TypeResolver = Callable[[str, ILoadingContext], Type[Any]]
+ObjectFactory = Callable[[str, ILoadingContext], Any]
 
 _TYPE_FORMAT_MSG = _("""\
 Type tag should be in the form !type:path.to.Type, got {}""")
@@ -34,18 +34,18 @@ class ObjectField(BaseField):
 
         def __init__(
             self,
-            type_resolver: Optional[TypeResolver] = None,
+            object_factory: Optional[ObjectFactory] = None,
             fields_resolver: Optional[FieldsResolver] = None,
             hook_resolver: Optional[HookResolver] = None,
         ):
             """Initialize the config class."""
-            self._type_resolver = type_resolver if type_resolver is not None else self._default_type_resolver
+            self._object_factory = object_factory if object_factory is not None else self._default_object_factory
             self._fields_resolver = fields_resolver if fields_resolver is not None else self._default_fields_resolver
             self._hook_resolver = hook_resolver if hook_resolver is not None else self._default_hook_resolver
 
-        def get_type(self, type_name: str, context: ILoadingContext) -> Optional[Type[Any]]:
+        def create(self, type_name: str, context: ILoadingContext) -> Optional[Any]:
             """Get hook of given name for given object."""
-            return self._type_resolver(type_name, context)
+            return self._object_factory(type_name, context)
 
         def get_fields(self, obj: Any) -> Dict[str, IBaseField]:
             """Get fields for the given object."""
@@ -56,7 +56,7 @@ class ObjectField(BaseField):
             return self._hook_resolver(obj, hook_name)
 
         @staticmethod
-        def _default_type_resolver(type_name: str, context: ILoadingContext) -> Optional[Type[Any]]:
+        def _default_object_factory(type_name: str, context: ILoadingContext) -> Optional[Type[Any]]:
             splitted_name = type_name.split('.')
 
             if len(splitted_name) < 2:
@@ -82,7 +82,7 @@ class ObjectField(BaseField):
                 context.error(ErrorCode.TYPE_RESOLVE_ERROR, _('Python type {} is not a class'), type_name)
                 return None
 
-            return cast(Type[Any], resolved_type)
+            return resolved_type()
 
         @staticmethod
         def _default_fields_resolver(object_class: Type[Any]) -> Dict[str, IBaseField]:
@@ -131,21 +131,20 @@ class ObjectField(BaseField):
                 context.error(ErrorCode.BAD_TYPE_TAG_FORMAT, _TYPE_FORMAT_MSG, tag)
                 return None
             type_name = splitted_tag[1]
-            object_class = config.get_type(type_name, context)
+            result = config.create(type_name, context)
         else:
-            object_class = self._object_class
+            obj = self._object_class()
 
-        if object_class is None:
+        if obj is None:
             return UNDEFINED
 
-        return _load(object_class, context, config)
+        return _load(obj, context, config)
 
 
-def _load(object_class: Type[Any], context: ILoadingContext, config: ObjectField.Config) -> Any:
-    fields = _get_fields(object_class, config)
+def _load(obj: Any, context: ILoadingContext, config: ObjectField.Config) -> Any:
+    fields = _get_fields(obj, config)
 
     node = context.current_node()
-    result = object_class()
     set_fields = set()
 
     for name_node, value_node in node.value:
@@ -167,14 +166,14 @@ def _load(object_class: Type[Any], context: ILoadingContext, config: ObjectField
         if field_value is UNDEFINED:
             continue
 
-        setattr(result, field_name, field_value)
+        setattr(obj, field_name, field_value)
 
-    if _validate(result, fields, set_fields, context, config):
-        post_load = config.get_hook(result, 'post_load')
+    if _validate(obj, fields, set_fields, context, config):
+        post_load = config.get_hook(obj, 'post_load')
         if post_load is not None:
             post_load()
 
-        return result
+        return obj
 
     return UNDEFINED
 
