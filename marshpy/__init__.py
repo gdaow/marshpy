@@ -6,10 +6,10 @@ from .core.errors import ErrorCode
 from .core.errors import ErrorHandler
 from .core.errors import FieldNotDeclaredError
 from .core.errors import ImportNotFoundError
-from .core.errors import MissingRequiredFieldError
-from .core.errors import MultipleMatchingHandlersError
 from .core.errors import MarshPyError
 from .core.errors import MarshPyValueError
+from .core.errors import MissingRequiredFieldError
+from .core.errors import MultipleMatchingHandlersError
 from .core.errors import SchemaError
 from .core.errors import TypeResolveError
 from .core.errors import UnexpectedNodeTypeError
@@ -17,6 +17,8 @@ from .core.errors import ValidationError
 from .core.errors import get_exception_type
 from .core.interfaces import ILoadingContext
 from .core.loading_context import LoadingContext
+from .core.resolvers import ANNOTATION_RESOLVER_CONFIG
+from .core.resolvers import annotation_fields_resolver
 
 from .fields.base_field import BaseField
 from .fields.bool_field import BoolField

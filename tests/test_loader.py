@@ -159,9 +159,9 @@ def test_schema_resolver_is_called() -> None:
         def __init__(self) -> None:
             self.string_field = 'default value'
 
-    def _field_resolver(cls: Type[Any]) -> Dict[str, IBaseField]:
+    def _field_resolver(obj: Any) -> Dict[str, IBaseField]:
         nonlocal resolver_called
-        if cls == _Object:
+        if obj.__class__ == _Object:
             resolver_called = True
             return dict(string_field=StringField())
         return {}

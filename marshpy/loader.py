@@ -67,17 +67,6 @@ def load( # pylint: disable=too-many-locals
         root_field:         The field to use to load the root node. You can
                             specify a type (list, dict, one of the scalar types
                             or an objec type as cls parameter to get it infered)
-        flags:              Flags to define during loading. Those can be used
-                            during deserialization to customize the loaded
-                            objects.
-        field_resolver:     Function returning the fields definition for the
-                            given type, or None if not found. By default, it
-                            will search for a class variable named 'fields' in
-                            the deserialized type.
-        hook_resolver:      Function returning the hook with the given name for
-                            the given object, or None if not found. By default,
-                            it will search for an instance method named like the
-                            hook on the given object.
         config:             List of objects used to eventually configure custom
                             fields, that will be retrievable through the
                             get_config method.

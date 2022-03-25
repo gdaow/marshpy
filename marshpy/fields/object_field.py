@@ -85,12 +85,8 @@ class ObjectField(BaseField):
             return resolved_type()
 
         @staticmethod
-        def _default_fields_resolver(object_class: Type[Any]) -> Dict[str, IBaseField]:
-            if not hasattr(object_class, 'fields'):
-                return {}
-
-            schema = getattr(object_class, 'fields')
-            return cast(Dict[str, IBaseField], schema)
+        def _default_fields_resolver(obj: Any) -> Dict[str, IBaseField]:
+            return _get_class_fields(obj.__class__)
 
         @staticmethod
         def _default_hook_resolver(obj: Any, hook_name: str) -> Optional[Callable[..., None]]:
@@ -142,7 +138,7 @@ class ObjectField(BaseField):
 
 
 def _load(obj: Any, context: ILoadingContext, config: ObjectField.Config) -> Any:
-    fields = _get_fields(obj.__class__, config)
+    fields = config.get_fields(obj)
 
     node = context.current_node()
     set_fields = set()
@@ -178,15 +174,16 @@ def _load(obj: Any, context: ILoadingContext, config: ObjectField.Config) -> Any
     return UNDEFINED
 
 
-def _get_fields(cls: Type[Any], config: ObjectField.Config) -> Dict[str, IBaseField]:
+def _get_class_fields(cls: Type[Any]) -> Dict[str, IBaseField]:
     fields = {}
 
     for parent in cls.__bases__:
-        parent_fields = _get_fields(parent, config)
+        parent_fields = _get_class_fields(parent)
         fields.update(parent_fields)
 
-    class_fields = config.get_fields(cls)
-    fields.update(class_fields)
+    if hasattr(cls, 'fields'):
+        class_fields = getattr(cls, 'fields')
+        fields.update(class_fields)
 
     return fields
 
