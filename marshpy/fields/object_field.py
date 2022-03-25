@@ -131,7 +131,7 @@ class ObjectField(BaseField):
                 context.error(ErrorCode.BAD_TYPE_TAG_FORMAT, _TYPE_FORMAT_MSG, tag)
                 return None
             type_name = splitted_tag[1]
-            result = config.create(type_name, context)
+            obj = config.create(type_name, context)
         else:
             obj = self._object_class()
 
@@ -142,7 +142,7 @@ class ObjectField(BaseField):
 
 
 def _load(obj: Any, context: ILoadingContext, config: ObjectField.Config) -> Any:
-    fields = _get_fields(obj, config)
+    fields = _get_fields(obj.__class__, config)
 
     node = context.current_node()
     set_fields = set()
