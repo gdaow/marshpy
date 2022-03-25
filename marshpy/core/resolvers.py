@@ -18,11 +18,6 @@ _LITERAL_FIELD_MAPPINGS = {
     float: FloatField
 }
 
-_CONTAINER_FIELD_MAPPING = {
-    dict: DictField,
-    list: ListField
-}
-
 def annotation_fields_resolver(obj: Any) -> dict[str, IBaseField]:
     result = {}
     annotations = obj.__annotations__
@@ -42,11 +37,17 @@ def _build_field(field_type: Type[Any]):
         return _LITERAL_FIELD_MAPPINGS[field_type]()
 
     origin_type = get_origin(field_type)
-    if origin_type in _CONTAINER_FIELD_MAPPING:
-        type_args = get_args(field_type)
+    type_args = get_args(field_type)
+    if origin_type == list:
         assert len(type_args) == 1
         nested_field = _build_field(type_args[0])
-        return _CONTAINER_FIELD_MAPPING[origin_type](nested_field)
+        return ListField(nested_field)
+
+    if origin_type == dict:
+        assert len(type_args) == 2
+        assert type_args[0] == str
+        nested_field = _build_field(type_args[1])
+        return DictField(nested_field)
 
     return ObjectField(field_type)
 
