@@ -7,7 +7,7 @@ on:
 
 jobs:
   lint:
-    name: Lint
+    name: Publish to Pypi
     runs-on: ubuntu-latest
     steps:
     - name: Checkout
@@ -16,7 +16,7 @@ jobs:
     - name: Setup Nox
       uses: excitedleigh/setup-nox@v2.0.0
 
-    - name: Lint
+    - name: Publish
       run: nox -s publish
       env:
         POETRY_PYPI_TOKEN_PYPI: ${{ secrets.PYPI_TOKEN }}
