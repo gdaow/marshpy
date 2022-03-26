@@ -8,43 +8,40 @@ on:
   pull_request:
 
 jobs:
-  Lint:
+  lint:
+    name: Lint
+    strategy:
+      max-parallel: 8
+      matrix:
+        linter: ['flake8', 'isort', 'black', 'pylint', 'mypy']
     runs-on: ubuntu-latest
     steps:
     - name: Checkout
       uses: actions/checkout@v1
-
-    - name: Set Up Python
-      uses: actions/setup-python@v1
-
-    - name: Install Dependencies
-      run: pip install -r requirements-dev.txt
+        
+    - name: Setup Nox
+      uses: excitedleigh/setup-nox@v2.0.0
 
     - name: Lint
-      run: prospector
-    
-  unit-tests:
+      run: nox -s ${{ matrix.linter }}
+
+  checks:
     name: Unit Tests
     runs-on: ubuntu-latest
     strategy:
       max-parallel: 4
       matrix:
-        python-version: [3.6, 3.7, 3.8, 3.9]
+        python-version: [3.9, 3.10]
 
     steps:
     - name: Checkout
       uses: actions/checkout@v1
 
-    - name: Set Up Python
-      uses: actions/setup-python@v1
-      with:
-        python-version: ${{ matrix.python-version }}
-
-    - name: Install Dependencies
-      run: pip install -r requirements-dev.txt
+    - name: Setup Nox
+      uses: excitedleigh/setup-nox@v2.0.0
 
     - name: Run Unit Tests
-      run: pytest --cov-report term-missing
+      run: nox -s tests-${{ matrix.python-version }}
 
     - name: Upload Coverage
       if: matrix.python-version == '3.9'
