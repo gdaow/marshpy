@@ -1,7 +1,6 @@
 """Float field class & utilities."""
 from gettext import gettext as _
-from typing import Any
-from typing import Optional
+from typing import Any, Optional
 
 from marshpy.core.constants import UNDEFINED
 from marshpy.core.errors import ErrorCode
@@ -40,14 +39,10 @@ class FloatField(ScalarField):
             result = float(value)
         except ValueError:
             context.error(
-                ErrorCode.VALUE_ERROR,
-                _('Can\'t convert "{}" to a float'), value
+                ErrorCode.VALUE_ERROR, _('Can\'t convert "{}" to a float'), value
             )
             return UNDEFINED
 
         return ScalarField._check_in_bounds(
-            context,
-            result,
-            self._minimum,
-            self._maximum
+            context, result, self._minimum, self._maximum
         )

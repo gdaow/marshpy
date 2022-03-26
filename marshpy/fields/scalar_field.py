@@ -1,14 +1,12 @@
 """Base field class & utilities."""
 from abc import abstractmethod
 from gettext import gettext as _
-from typing import Any
-from typing import Optional
-from typing import Union
+from typing import Any, Optional, Union
 
 from marshpy.core.constants import UNDEFINED
 from marshpy.core.errors import ErrorCode
-from marshpy.fields.base_field import BaseField
 from marshpy.core.interfaces import ILoadingContext
+from marshpy.fields.base_field import BaseField
 
 
 class ScalarField(BaseField):
@@ -41,19 +39,21 @@ class ScalarField(BaseField):
         context: ILoadingContext,
         value: Union[int, float],
         minimum: Optional[Union[int, float]],
-        maximum: Optional[Union[int, float]]
+        maximum: Optional[Union[int, float]],
     ) -> Any:
         if minimum is not None and value < minimum:
             context.error(
                 ErrorCode.VALIDATION_ERROR,
-                _('Value is too small (minimum : {})'), minimum
+                _("Value is too small (minimum : {})"),
+                minimum,
             )
             return UNDEFINED
 
         if maximum is not None and value > maximum:
             context.error(
                 ErrorCode.VALIDATION_ERROR,
-                _('Value is too big (maximum : {})'), maximum
+                _("Value is too big (maximum : {})"),
+                maximum,
             )
             return UNDEFINED
 

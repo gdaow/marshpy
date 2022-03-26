@@ -2,20 +2,13 @@
 from abc import abstractmethod
 from gettext import gettext as _
 from pathlib import Path
-from typing import Any
-from typing import Iterable
-from typing import Iterator
-from typing import List
-from typing import Optional
-from typing import cast
+from typing import Any, Iterable, Iterator, List, Optional, cast
 
-from yaml import Node
-from yaml import compose
+from yaml import Node, compose
 from yaml.parser import ParserError
 
 from marshpy.core.errors import ErrorCode
-from marshpy.core.interfaces import IBaseField
-from marshpy.core.interfaces import ILoadingContext
+from marshpy.core.interfaces import IBaseField, ILoadingContext
 from marshpy.tag_handlers.tag_handler import TagHandler
 
 
@@ -33,13 +26,15 @@ class PathHandler(TagHandler):
             """Initialize the config.
 
             Args:
-                roots:      Base filesystem paths used to resolve paths in handlers inheriting from PathHandler.
+                roots: Base filesystem paths used to resolve paths in handlers
+                       inheriting from PathHandler.
 
             """
             if roots is not None:
                 for root_it in roots:
-                    assert isinstance(root_it, Path), \
-                        _('roots must be a list of Path objects')
+                    assert isinstance(root_it, Path), _(
+                        "roots must be a list of Path objects"
+                    )
 
                 self._roots = list(roots)
             else:
@@ -50,10 +45,7 @@ class PathHandler(TagHandler):
             """Get the configured root paths."""
             return self._roots
 
-    def __init__(
-        self,
-        allow_relative: bool = True
-    ):
+    def __init__(self, allow_relative: bool = True):
         """Initialize the PathHandler.
 
         Args:
@@ -88,14 +80,14 @@ class PathHandler(TagHandler):
     @staticmethod
     def _load_file(context: ILoadingContext, path: Path) -> Optional[Node]:
         """Load a YAML document, emit a MarshPyError on ParseError."""
-        with open(path, 'r') as yaml_file:
+        with open(path, "r", encoding="utf-8") as yaml_file:
             try:
-                return cast(Node, compose(yaml_file)) # type: ignore
+                return cast(Node, compose(yaml_file))  # type: ignore
             except ParserError as error:
                 context.error(
                     ErrorCode.VALUE_ERROR,
-                    _('Parse error while loading {} : {}'),
+                    _("Parse error while loading {} : {}"),
                     path,
-                    error
+                    error,
                 )
         return None

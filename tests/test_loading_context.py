@@ -5,14 +5,11 @@ from pytest import raises
 from yaml import Node
 from yaml.error import Mark
 
-from marshpy.core.errors import ErrorCode
-from marshpy.core.errors import MarshPyValueError
-from marshpy.core.interfaces import IBaseField
-from marshpy.core.interfaces import ILoadingContext
+from marshpy.core.errors import ErrorCode, MarshPyValueError
+from marshpy.core.interfaces import IBaseField, ILoadingContext
 from marshpy.core.loading_context import LoadingContext
 from marshpy.fields.base_field import BaseField
 from marshpy.tag_handlers.tag_handler import TagHandler
-
 from tests.helpers import check_load
 
 
@@ -22,7 +19,7 @@ def test_loading_context_raises() -> None:
 
     class _RaisingField(BaseField):
         def _load(self, context: ILoadingContext) -> None:
-            context.error(ErrorCode.VALUE_ERROR, 'Test message')
+            context.error(ErrorCode.VALUE_ERROR, "Test message")
 
     with raises(MarshPyValueError):
         context.load(_RaisingField(), _get_dummy_node())
@@ -30,25 +27,24 @@ def test_loading_context_raises() -> None:
 
 def test_loading_context_raises_on_multiple_tag_match() -> None:
     """Loading context should emit an error a tag is ambigous."""
+
     class _DummyHandler(TagHandler):
-        tag_pattern = '^dummy$'
+        tag_pattern = "^dummy$"
 
         def load(self, context: ILoadingContext, field: IBaseField) -> Node:
             return context.current_node()
 
     check_load(
-        '!dummy value',
+        "!dummy value",
         str,
         expected_error=ErrorCode.MULTIPLE_MATCHING_HANDLERS,
-        tag_handlers=[
-            _DummyHandler(),
-            _DummyHandler()
-        ]
+        tag_handlers=[_DummyHandler(), _DummyHandler()],
     )
 
 
 def test_loading_context_returns_node_location() -> None:
     """Loading context should store the last given location for a node."""
+
     def _check(location: Optional[str]) -> None:
         class _ChildField(BaseField):
             def _load(self, context: ILoadingContext) -> None:
@@ -61,7 +57,7 @@ def test_loading_context_returns_node_location() -> None:
         context = LoadingContext(error_handler=None, tag_handlers=[])
         context.load(_ParentField(), _get_dummy_node(), location)
 
-    _check('/some/location')
+    _check("/some/location")
 
     # This should go all the way up in the node stack and finally return None
     _check(None)
@@ -69,8 +65,8 @@ def test_loading_context_returns_node_location() -> None:
 
 def _get_dummy_node() -> Node:
     return Node(
-        'tag',
-        'value',
-        Mark('file_name', 0, 10, 42, None, None),
-        Mark('file_name', 0, 12, 32, None, None)
+        "tag",
+        "value",
+        Mark("file_name", 0, 10, 42, None, 0),
+        Mark("file_name", 0, 12, 32, None, 0),
     )

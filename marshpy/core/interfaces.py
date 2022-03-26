@@ -1,23 +1,19 @@
 """MarshPy common definitions."""
 from abc import abstractmethod
-from typing import Any
-from typing import Optional
-from typing import Type
-from typing import TypeVar
+from typing import Any, Optional, Type, TypeVar
 
 from yaml import Node
 
 from marshpy.core.errors import ErrorCode
 
-
-ConfigType = TypeVar('ConfigType')
+ConfigType = TypeVar("ConfigType")
 
 
 class IBaseField:
     """Interface used to avoid cyclic imports for type hint."""
 
     @abstractmethod
-    def load(self, context: 'ILoadingContext') -> Any:
+    def load(self, context: "ILoadingContext") -> Any:
         """Deserialize this field.
 
         Args:
@@ -41,10 +37,7 @@ class ILoadingContext:
 
     @abstractmethod
     def load(
-        self,
-        field: IBaseField,
-        node: Node,
-        location: Optional[str] = None
+        self, field: IBaseField, node: Node, location: Optional[str] = None
     ) -> Any:
         """Push a node in the context.
 
@@ -89,11 +82,7 @@ class ILoadingContext:
 
     @abstractmethod
     def error(
-        self,
-        code: ErrorCode,
-        message_format: str,
-        *args: Any,
-        **kwargs: Any
+        self, code: ErrorCode, message_format: str, *args: Any, **kwargs: Any
     ) -> None:
         """Register an error in the current loading context.
 

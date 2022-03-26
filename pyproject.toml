@@ -1,0 +1,64 @@
+[build-system]
+requires = ['poetry-core>=1.0.0', 'poetry-dynamic-versioning']
+build-backend = 'poetry.core.masonry.api'
+
+[tool.poetry]
+name = 'marshpy'
+version = '0.0.0'
+description = 'YAML to Python unmarshalling library'
+authors = ['Corentin Séchet <gdaow@ki-dour.org>']
+license = 'WTFPL'
+readme  = 'README.md'
+repository = 'https://github.com/gdaow/marshpy'
+keywords = ['yaml', 'marshalling', 'serialization', 'serializing', 'validation']
+classifiers = [
+	"Development Status :: 3 - Alpha",
+	"Intended Audience :: Developers",
+	"Operating System :: OS Independent",
+	"Programming Language :: Python",
+	"Programming Language :: Python :: 3.9",
+	"Programming Language :: Python :: 3.10",
+	"Programming Language :: Python :: Implementation :: CPython",
+	"Programming Language :: Python :: Implementation :: PyPy",
+	"Topic :: Software Development :: Libraries :: Python Modules",
+	"Topic :: Text Processing :: Markup",
+]
+packages = [
+	{ include = 'marshpy/**/*' },
+]
+
+[tool.poetry.dependencies]
+python = '^3.9'
+PyYAML = "^6.0"
+
+[tool.poetry-dynamic-versioning]
+enable = false
+
+[tool.pytest.ini_options]
+junit_family = "legacy"
+addopts = "--cov=marshpy --cov-report html"
+testpaths = "tests"
+
+[[tool.mypy.overrides]]
+module = 'pytest'
+ignore_missing_imports = true
+
+[[tool.mypy.overrides]]
+module = 'nox'
+ignore_missing_imports = true
+
+[tool.isort]
+profile = "black"
+
+[tool.pylint.messages_control]
+disable = [
+	"invalid-name",
+	"too-few-public-methods",
+	"line-too-long", # Already checked by black
+	"too-many-arguments",
+]
+
+[tool.pylint.similaritie]
+ignore-imports=true
+ignore-signatures=true
+

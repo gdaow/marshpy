@@ -1,25 +1,22 @@
 """Tag handler used to import files in YAML documents."""
 from gettext import gettext as _
 from typing import Any
+
 from yaml import SequenceNode
 
 from marshpy.core.constants import UNDEFINED
-from marshpy.core.interfaces import ILoadingContext
-from marshpy.core.interfaces import IBaseField
+from marshpy.core.interfaces import IBaseField, ILoadingContext
 from marshpy.tag_handlers.path_handler import PathHandler
 
 
 class GlobHandler(PathHandler):
     """glob tag, include a list of file as a sequence node."""
 
-    tag_pattern = '^(glob)$'
+    tag_pattern = "^(glob)$"
 
-    def load(self, context: ILoadingContext, field: IBaseField) \
-            -> Any:
+    def load(self, context: ILoadingContext, field: IBaseField) -> Any:
         """See Resolver.resolve for usage."""
-        if not context.expect_scalar(
-            _('glob must be set on a scalar node')
-        ):
+        if not context.expect_scalar(_("glob must be set on a scalar node")):
             return UNDEFINED
 
         node = context.current_node()
@@ -35,5 +32,5 @@ class GlobHandler(PathHandler):
                 if content is not None:
                     result.append(content)
 
-        fake_node = SequenceNode('', result, node.start_mark, node.end_mark)
+        fake_node = SequenceNode("", result, node.start_mark, node.end_mark)
         return context.load(field, fake_node)

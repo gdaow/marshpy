@@ -1,23 +1,18 @@
 """Base field class & utilities."""
 from abc import abstractmethod
 from gettext import gettext as _
-from typing import Any
-from typing import Optional
+from typing import Any, Optional
 
 from marshpy.core.constants import UNDEFINED
-from marshpy.core.interfaces import IBaseField
-from marshpy.core.interfaces import ILoadingContext
-from marshpy.core.validation import ValidateCallback
-from marshpy.core.validation import ValidationContext
+from marshpy.core.interfaces import IBaseField, ILoadingContext
+from marshpy.core.validation import ValidateCallback, ValidationContext
 
 
 class BaseField(IBaseField):
     """Base class for all MarshPy fields."""
 
     def __init__(
-        self,
-        required: bool = False,
-        validate: Optional[ValidateCallback] = None
+        self, required: bool = False, validate: Optional[ValidateCallback] = None
     ) -> None:
         """Initialize the field.
 
@@ -35,7 +30,7 @@ class BaseField(IBaseField):
 
         """
         if validate is not None:
-            assert callable(validate), _('validate must be a callable object.')
+            assert callable(validate), _("validate must be a callable object.")
         self._required = required
         self._validate = validate
 

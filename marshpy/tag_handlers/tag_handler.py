@@ -3,15 +3,13 @@
 Resolvers are used when an !include tag is encountered, to load the included
 YAML documents.
 """
-from abc import abstractmethod
-from abc import ABC
+from abc import ABC, abstractmethod
 from re import compile as re_compile
 from typing import Any
 
 from yaml import Node
 
-from marshpy.core.interfaces import IBaseField
-from marshpy.core.interfaces import ILoadingContext
+from marshpy.core.interfaces import IBaseField, ILoadingContext
 
 
 class TagHandler(ABC):
@@ -35,7 +33,7 @@ class TagHandler(ABC):
 
         """
         assert node.tag is not None
-        assert node.tag[0] == '!'  # Only handle custom tags.
+        assert node.tag[0] == "!"  # Only handle custom tags.
 
         pattern = self._compiled_pattern
         tag = node.tag[1:]  # Remove !

@@ -1,8 +1,7 @@
 """Path field class & utilities."""
 from gettext import gettext as _
 from pathlib import Path
-from typing import Any
-from typing import Optional
+from typing import Any, Optional
 
 from marshpy.core.constants import UNDEFINED
 from marshpy.core.errors import ErrorCode
@@ -18,7 +17,7 @@ class PathField(ScalarField):
         self,
         required: bool = False,
         validate: Optional[ValidateCallback] = None,
-        must_exist: bool = True
+        must_exist: bool = True,
     ):
         """Initialize the Path field.
 
@@ -43,11 +42,7 @@ class PathField(ScalarField):
                 path = parent / path
 
         if self._must_exist and not path.exists():
-            context.error(
-                ErrorCode.VALIDATION_ERROR,
-                _('Cannot find path {}.'),
-                path
-            )
+            context.error(ErrorCode.VALIDATION_ERROR, _("Cannot find path {}."), path)
             return UNDEFINED
 
         return path

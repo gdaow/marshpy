@@ -1,13 +1,10 @@
 """Validation related class & utilities."""
-from typing import Any
-from typing import Optional
-from typing import Callable
+from typing import Any, Callable, Optional
 
 from marshpy.core.errors import ErrorCode
 from marshpy.core.interfaces import ILoadingContext
 
-
-ValidateCallback = Callable[['ValidationContext', Any], None]
+ValidateCallback = Callable[["ValidationContext", Any], None]
 
 
 class ValidationContext:
@@ -25,12 +22,7 @@ class ValidationContext:
         """
         return self._loading_context.current_location()
 
-    def error(
-        self,
-        message_format: str,
-        *args: Any,
-        **kwargs: Any
-    ) -> None:
+    def error(self, message_format: str, *args: Any, **kwargs: Any) -> None:
         """Raise a validation error with the given format & args.
 
         Args:
@@ -40,10 +32,7 @@ class ValidationContext:
         """
         self._has_error = True
         self._loading_context.error(
-            ErrorCode.VALIDATION_ERROR,
-            message_format,
-            *args,
-            **kwargs
+            ErrorCode.VALIDATION_ERROR, message_format, *args, **kwargs
         )
 
     def has_error(self) -> bool:

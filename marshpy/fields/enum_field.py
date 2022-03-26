@@ -1,9 +1,7 @@
 """Enum field class & utilities."""
 from enum import Enum
 from gettext import gettext as _
-from typing import Any
-from typing import Optional
-from typing import Type
+from typing import Any, Optional, Type
 
 from marshpy.core.constants import UNDEFINED
 from marshpy.core.errors import ErrorCode
@@ -19,7 +17,7 @@ class EnumField(ScalarField):
         self,
         enum_class: Type[Enum],
         required: bool = False,
-        validate: Optional[ValidateCallback] = None
+        validate: Optional[ValidateCallback] = None,
     ):
         """Initialize string field.
 
@@ -39,8 +37,8 @@ class EnumField(ScalarField):
 
         context.error(
             ErrorCode.VALIDATION_ERROR,
-            _('Unkown value {} for enum {}.'),
+            _("Unkown value {} for enum {}."),
             value,
-            self._enum_class
+            self._enum_class,
         )
         return UNDEFINED

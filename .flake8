@@ -1,0 +1,10 @@
+[flake8]
+ignore =
+	# Line too long
+	E501
+include = marshpy,test
+max-complexity = 10
+per-file-ignores =
+	# Imported but unused
+	__init__.py:F401
+

@@ -1,25 +1,12 @@
 """Loading context class & utilities."""
 from gettext import gettext as _
-from typing import Any
-from typing import Iterable
-from typing import List
-from typing import Optional
-from typing import Tuple
-from typing import Type
+from typing import Any, Iterable, List, Optional, Tuple, Type
 
-from yaml import MappingNode
-from yaml import Node
-from yaml import ScalarNode
-from yaml import SequenceNode
+from yaml import MappingNode, Node, ScalarNode, SequenceNode
 
-from marshpy.core.errors import ErrorCode
-from marshpy.core.errors import ErrorHandler
-from marshpy.core.errors import get_exception_type
-from marshpy.core.interfaces import ConfigType
-from marshpy.core.interfaces import IBaseField
-from marshpy.core.interfaces import ILoadingContext
+from marshpy.core.errors import ErrorCode, ErrorHandler, get_exception_type
+from marshpy.core.interfaces import ConfigType, IBaseField, ILoadingContext
 from marshpy.tag_handlers.tag_handler import TagHandler
-
 
 NodeStack = List[Tuple[Node, Optional[str]]]
 
@@ -31,15 +18,19 @@ class LoadingContext(ILoadingContext):
         self,
         error_handler: Optional[ErrorHandler],
         tag_handlers: Iterable[TagHandler],
-        config: Optional[List[Any]] = None
+        config: Optional[List[Any]] = None,
     ):
         """Initialize LoadingContext.
 
         Args:
-            error_handler : Called with arguments (node, error_message) when an error occurs. If it's not specified, a
-                            MarshPyError will be raised when an error occurs. (see errors.py)
-            tag_handlers :  Tag handlers used to apply custom behaviors when encountering YAML tags.
-            config:         List of objects used to eventually configure fields and tag handlers, that will be
+            error_handler : Called with arguments (node, error_message) when an error
+                            occurs. If it's not specified, a
+                            MarshPyError will be raised when an error occurs. (see
+                            errors.py)
+            tag_handlers :  Tag handlers used to apply custom behaviors when
+                            encountering YAML tags.
+            config:         List of objects used to eventually configure fields and tag
+                            handlers, that will be
                             retrievable through the get_config method.
 
         """
@@ -53,10 +44,7 @@ class LoadingContext(ILoadingContext):
             self._config = []
 
     def load(
-        self,
-        field: IBaseField,
-        node: Node,
-        location: Optional[str] = None
+        self, field: IBaseField, node: Node, location: Optional[str] = None
     ) -> Any:
         """Push a node in the context.
 
@@ -111,32 +99,19 @@ class LoadingContext(ILoadingContext):
     def expect_scalar(self, message: Optional[str] = None) -> bool:
         """Return false and raise an error if the current node isn't scalar."""
         if message is None:
-            message = _('Expected a scalar value.')
-        return self._expect_node(
-            ScalarNode,
-            message
-        )
+            message = _("Expected a scalar value.")
+        return self._expect_node(ScalarNode, message)
 
     def expect_sequence(self) -> bool:
         """Return false and raise if the current node isn't a sequence."""
-        return self._expect_node(
-            SequenceNode,
-            _('Expected a sequence value.')
-        )
+        return self._expect_node(SequenceNode, _("Expected a sequence value."))
 
     def expect_mapping(self) -> bool:
         """Return false and raise if the current node isn't a mapping."""
-        return self._expect_node(
-            MappingNode,
-            _('Expected a mapping value.')
-        )
+        return self._expect_node(MappingNode, _("Expected a mapping value."))
 
     def error(
-        self,
-        code: ErrorCode,
-        message_format: str,
-        *args: Any,
-        **kwargs: Any
+        self, code: ErrorCode, message_format: str, *args: Any, **kwargs: Any
     ) -> None:
         """Register an error in the current loading context.
 
@@ -159,27 +134,18 @@ class LoadingContext(ILoadingContext):
             raise exception_type(node, message)
 
     def _expect_node(
-        self,
-        node_type: Type[Node],
-        error_format: str,
-        *args: Any,
-        **kwargs: Any
+        self, node_type: Type[Node], error_format: str, *args: Any, **kwargs: Any
     ) -> bool:
         current_node = self.current_node()
         if not isinstance(current_node, node_type):
-            self.error(
-                ErrorCode.UNEXPECTED_NODE_TYPE,
-                error_format,
-                *args,
-                **kwargs
-            )
+            self.error(ErrorCode.UNEXPECTED_NODE_TYPE, error_format, *args, **kwargs)
             return False
 
         return True
 
     def _get_tag_handler(self, node: Node) -> Optional[TagHandler]:
         tag = node.tag
-        if not tag.startswith('!'):
+        if not tag.startswith("!"):
             return None
 
         found_handler = None
@@ -190,7 +156,8 @@ class LoadingContext(ILoadingContext):
             if found_handler is not None:
                 self.error(
                     ErrorCode.MULTIPLE_MATCHING_HANDLERS,
-                    _('Got multiple matching handlers for tag {}'), tag
+                    _("Got multiple matching handlers for tag {}"),
+                    tag,
                 )
                 continue
 

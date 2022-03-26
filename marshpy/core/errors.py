@@ -1,7 +1,6 @@
 """MarshPy error handling related classes & definitions."""
 from enum import Enum
-from typing import Callable
-from typing import Type
+from typing import Callable, Type
 
 from yaml import Node
 
@@ -61,13 +60,8 @@ class MarshPyError(Exception):
     @staticmethod
     def _get_message(node: Node, message: str) -> str:
         start = node.start_mark
-        file_name = getattr(start, 'name', '<Unkwnown>')
-        return '{file}:{line}:{column} : {message}'.format(
-            file=file_name,
-            line=start.line,
-            column=start.column,
-            message=message
-        )
+        file_name = getattr(start, "name", "<Unkwnown>")
+        return f"{file_name}:{start.line}:{start.column} : {message}"
 
 
 class BadTypeFormatError(MarshPyError):

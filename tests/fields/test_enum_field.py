@@ -3,9 +3,7 @@ from enum import Enum
 
 from marshpy.core.errors import ErrorCode
 from marshpy.fields.enum_field import EnumField
-
-from tests.helpers import check_field
-from tests.helpers import check_field_error
+from tests.helpers import check_field, check_field_error
 
 
 class _TestEnum(Enum):
@@ -15,29 +13,27 @@ class _TestEnum(Enum):
 
 
 class _Test:
-    fields = {
-        'enum': EnumField(enum_class=_TestEnum)
-    }
+    fields = {"enum": EnumField(enum_class=_TestEnum)}
 
 
 def _check_field(yml_value: str, expected_value: _TestEnum) -> None:
-    check_field(_Test, 'enum', yml_value, expected_value)
+    check_field(_Test, "enum", yml_value, expected_value)
 
 
 def _check_field_error(yml_value: str, expected_error: ErrorCode) -> None:
-    check_field_error(_Test, 'enum', yml_value, expected_error)
+    check_field_error(_Test, "enum", yml_value, expected_error)
 
 
 def test_enum_field() -> None:
     """String field should load correct values."""
-    _check_field('FIRST', _TestEnum.FIRST)
-    _check_field('SECOND', _TestEnum.SECOND)
-    _check_field('THIRD', _TestEnum.THIRD)
+    _check_field("FIRST", _TestEnum.FIRST)
+    _check_field("SECOND", _TestEnum.SECOND)
+    _check_field("THIRD", _TestEnum.THIRD)
 
 
 def test_enum_field_error_handling() -> None:
     """String field should correctly handle errors."""
-    _check_field_error('[a, list]', ErrorCode.UNEXPECTED_NODE_TYPE)
-    _check_field_error('{a: dict}', ErrorCode.UNEXPECTED_NODE_TYPE)
+    _check_field_error("[a, list]", ErrorCode.UNEXPECTED_NODE_TYPE)
+    _check_field_error("{a: dict}", ErrorCode.UNEXPECTED_NODE_TYPE)
 
-    _check_field_error('BAD_ENUM', ErrorCode.VALIDATION_ERROR)
+    _check_field_error("BAD_ENUM", ErrorCode.VALIDATION_ERROR)

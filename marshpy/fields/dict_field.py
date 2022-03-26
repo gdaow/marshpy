@@ -1,7 +1,5 @@
 """Dictionary field class & utilities."""
-from gettext import gettext as _
-from typing import Any
-from typing import Optional
+from typing import Any, Optional
 
 from yaml import ScalarNode
 
@@ -9,9 +7,10 @@ from marshpy.core.constants import UNDEFINED
 from marshpy.core.interfaces import ILoadingContext
 from marshpy.core.validation import ValidateCallback
 from marshpy.fields.base_field import BaseField
+from marshpy.fields.container_field import ContainerField
 
 
-class DictField(BaseField):
+class DictField(ContainerField):
     """Dictionary YAML object field."""
 
     def __init__(
@@ -28,10 +27,7 @@ class DictField(BaseField):
             validate: See BaseField constructor.
 
         """
-        super().__init__(required=required, validate=validate)
-        assert isinstance(item_field, BaseField), \
-            _('item_field must be an implementation of BaseField.')
-        self._item_field = item_field
+        super().__init__(item_field=item_field, required=required, validate=validate)
 
     def _load(self, context: ILoadingContext) -> Any:
         node = context.current_node()

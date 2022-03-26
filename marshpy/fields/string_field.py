@@ -1,9 +1,7 @@
 """String field class & utilities."""
 from gettext import gettext as _
 from re import compile as re_compile
-from typing import Any
-from typing import Optional
-from typing import Pattern
+from typing import Any, Optional, Pattern
 
 from marshpy.core.constants import UNDEFINED
 from marshpy.core.errors import ErrorCode
@@ -19,7 +17,7 @@ class StringField(ScalarField):
         self,
         required: bool = False,
         validate: Optional[ValidateCallback] = None,
-        pattern: Optional[str] = None
+        pattern: Optional[str] = None,
     ):
         """Initialize string field.
 
@@ -36,8 +34,7 @@ class StringField(ScalarField):
         self._pattern: Optional[Pattern[str]] = None
 
         if pattern is not None:
-            assert isinstance(pattern, str), \
-                _('pattern must be a string.')
+            assert isinstance(pattern, str), _("pattern must be a string.")
             self._pattern_str = pattern
             self._pattern = re_compile(pattern)
 
@@ -45,9 +42,9 @@ class StringField(ScalarField):
         if self._pattern is not None and not self._pattern.match(value):
             context.error(
                 ErrorCode.VALIDATION_ERROR,
-                _('Value {} doesn\'t match required pattern {}'),
+                _("Value {} doesn't match required pattern {}"),
                 value,
-                self._pattern_str
+                self._pattern_str,
             )
             return UNDEFINED
 

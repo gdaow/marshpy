@@ -1,25 +1,19 @@
 """Handler merging."""
 from gettext import gettext as _
-from typing import Any
-from typing import Dict
-from typing import List
-from typing import Optional
-from typing import Union
+from typing import Any, Dict, List, Optional, Union
 
 from marshpy.core.constants import UNDEFINED
 from marshpy.core.errors import ErrorCode
-from marshpy.core.interfaces import IBaseField
-from marshpy.core.interfaces import ILoadingContext
+from marshpy.core.interfaces import IBaseField, ILoadingContext
 from marshpy.tag_handlers.tag_handler import TagHandler
 
 
 class MergeHandler(TagHandler):
     """Tag merging multiple list or dictionaries into one."""
 
-    tag_pattern = r'^merge$'
+    tag_pattern = r"^merge$"
 
-    def load(self, context: ILoadingContext, field: IBaseField) \
-            -> Any:
+    def load(self, context: ILoadingContext, field: IBaseField) -> Any:
         if not context.expect_sequence():
             return UNDEFINED
 
@@ -46,8 +40,7 @@ class MergeHandler(TagHandler):
                 result += child_result
 
             else:
-                msg = _('Trying to merge invalid object {}, expected dict or '
-                        'list')
+                msg = _("Trying to merge invalid object {}, expected dict or " "list")
                 context.error(ErrorCode.VALUE_ERROR, msg, result)
 
         # If nothing it's to merge, return UNDEFINED

@@ -1,6 +1,0 @@
-mypy
-prospector
-pyroma
-pytest
-pytest-cov
-pytest-datadir

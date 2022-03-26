@@ -6,8 +6,7 @@ from typing import Any
 from yaml import ScalarNode
 
 from marshpy.core.constants import UNDEFINED
-from marshpy.core.interfaces import IBaseField
-from marshpy.core.interfaces import ILoadingContext
+from marshpy.core.interfaces import IBaseField, ILoadingContext
 from marshpy.tag_handlers.tag_handler import TagHandler
 
 
@@ -17,12 +16,11 @@ class EnvHandler(TagHandler):
     Will replace the loaded node by the value of the environment variable.
     """
 
-    tag_pattern = '^env$'
+    tag_pattern = "^env$"
 
-    def load(self, context: ILoadingContext, field: IBaseField) \
-            -> Any:
+    def load(self, context: ILoadingContext, field: IBaseField) -> Any:
         if not context.expect_scalar(
-            _('!env must be set on a string node containing the variable name.')
+            _("!env must be set on a string node containing the variable name.")
         ):
             return UNDEFINED
 
@@ -32,11 +30,6 @@ class EnvHandler(TagHandler):
         if var_name not in environ:
             return UNDEFINED
 
-        fake_node = ScalarNode(
-            '',
-            environ[var_name],
-            node.start_mark,
-            node.end_mark
-        )
+        fake_node = ScalarNode("", environ[var_name], node.start_mark, node.end_mark)
 
         return context.load(field, fake_node)

@@ -1,8 +1,6 @@
 """Integer field class & utilities."""
 from gettext import gettext as _
-from typing import Any
-from typing import Optional
-from typing import cast
+from typing import Any, Optional, cast
 
 from marshpy.core.constants import UNDEFINED
 from marshpy.core.errors import ErrorCode
@@ -48,14 +46,11 @@ class IntField(ScalarField):
             result = int(value, self._base)
         except ValueError:
             context.error(
-                ErrorCode.VALUE_ERROR,
-                _('Can\'t convert "{}" to an integer'), value
+                ErrorCode.VALUE_ERROR, _('Can\'t convert "{}" to an integer'), value
             )
             return UNDEFINED
 
-        return cast(Optional[int], ScalarField._check_in_bounds(
-            context,
-            result,
-            self._minimum,
-            self._maximum
-        ))
+        return cast(
+            Optional[int],
+            ScalarField._check_in_bounds(context, result, self._minimum, self._maximum),
+        )

@@ -2,20 +2,11 @@
 from gettext import gettext as _
 from inspect import isclass
 from io import TextIOBase
-from typing import Any
-from typing import IO
-from typing import Iterable
-from typing import List
-from typing import Optional
-from typing import Type
-from typing import TypeVar
-from typing import Union
-from typing import cast
+from typing import IO, Any, Iterable, List, Optional, Type, TypeVar, Union, cast
 
 from yaml import compose
 
-from marshpy.core.constants import LoadResult
-from marshpy.core.constants import UNDEFINED
+from marshpy.core.constants import UNDEFINED, LoadResult
 from marshpy.core.errors import ErrorHandler
 from marshpy.core.loading_context import LoadingContext
 from marshpy.fields.base_field import BaseField
@@ -38,19 +29,19 @@ _ROOT_FIELDS_MAPPING = {
     float: FloatField(),
     int: IntField(),
     list: ListField(StringField()),
-    str: StringField()
+    str: StringField(),
 }
 
-ObjectType = TypeVar('ObjectType')
+ObjectType = TypeVar("ObjectType")
 
 
-def load( # pylint: disable=too-many-locals
+def load(  # pylint: disable=too-many-locals
     source: Union[str, IO[str]],
     object_class: Optional[Type[ObjectType]] = None,
     tag_handlers: Optional[Iterable[TagHandler]] = None,
     error_handler: Optional[ErrorHandler] = None,
     root_field: Optional[BaseField] = None,
-    config: Optional[List[Any]] = None
+    config: Optional[List[Any]] = None,
 ) -> LoadResult[ObjectType]:
     """Deserialize a YAML file, stream or string into an object.
 
@@ -86,33 +77,31 @@ def load( # pylint: disable=too-many-locals
 
     if tag_handlers is not None:
         for handler_it in tag_handlers:
-            assert isinstance(handler_it, TagHandler), \
-                _('tag_handlers items should be subclasses of TagHandler')
+            assert isinstance(handler_it, TagHandler), _(
+                "tag_handlers items should be subclasses of TagHandler"
+            )
         all_tag_handlers.extend(tag_handlers)
 
     if error_handler is not None:
-        assert callable(error_handler), \
-            _('error_handler must be a callable object.')
+        assert callable(error_handler), _("error_handler must be a callable object.")
 
     context = LoadingContext(
-        error_handler=error_handler,
-        tag_handlers=all_tag_handlers,
-        config=config
+        error_handler=error_handler, tag_handlers=all_tag_handlers, config=config
     )
 
     if root_field is None:
         assert object_class is not None
-        assert isclass(object_class), _('object_class must be a type')
+        assert isclass(object_class), _("object_class must be a type")
         root_field = _ROOT_FIELDS_MAPPING.get(object_class)
 
     if root_field is None:
         assert object_class is not None
-        assert isclass(object_class), _('object_class must be a type')
+        assert isclass(object_class), _("object_class must be a type")
         root_field = ObjectField(object_class=object_class)
 
-    node = compose(source) # type: ignore
+    node = compose(source)  # type: ignore
     node_path = None
-    if isinstance(source, TextIOBase) and hasattr(source, 'name'):
+    if isinstance(source, TextIOBase) and hasattr(source, "name"):
         node_path = source.name
 
     result = context.load(root_field, node, node_path)

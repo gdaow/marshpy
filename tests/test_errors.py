@@ -4,23 +4,26 @@ from typing import Type
 from yaml import Node
 from yaml.error import Mark
 
-from marshpy.core.errors import BadTypeFormatError
-from marshpy.core.errors import ErrorCode
-from marshpy.core.errors import FieldNotDeclaredError
-from marshpy.core.errors import ImportNotFoundError
-from marshpy.core.errors import MissingRequiredFieldError
-from marshpy.core.errors import MultipleMatchingHandlersError
-from marshpy.core.errors import MarshPyError
-from marshpy.core.errors import MarshPyValueError
-from marshpy.core.errors import SchemaError
-from marshpy.core.errors import TypeResolveError
-from marshpy.core.errors import UnexpectedNodeTypeError
-from marshpy.core.errors import ValidationError
-from marshpy.core.errors import get_exception_type
+from marshpy.core.errors import (
+    BadTypeFormatError,
+    ErrorCode,
+    FieldNotDeclaredError,
+    ImportNotFoundError,
+    MarshPyError,
+    MarshPyValueError,
+    MissingRequiredFieldError,
+    MultipleMatchingHandlersError,
+    SchemaError,
+    TypeResolveError,
+    UnexpectedNodeTypeError,
+    ValidationError,
+    get_exception_type,
+)
 
 
 def test_get_exception_type_is_correct() -> None:
     """Test exception type returned by get_exception_type is correct."""
+
     def _check(code: ErrorCode, exception: Type[MarshPyError]) -> None:
         assert get_exception_type(code) == exception
 
@@ -39,16 +42,16 @@ def test_get_exception_type_is_correct() -> None:
 def test_exception_format() -> None:
     """Test exception __str__ method gives usefull informations."""
     node = Node(
-        'tag',
-        'value',
-        Mark('file_name', 0, 10, 42, None, None),
-        Mark('file_name', 0, 12, 32, None, None)
+        "tag",
+        "value",
+        Mark("file_name", 0, 10, 42, None, 0),
+        Mark("file_name", 0, 12, 32, None, 0),
     )
 
-    message = 'Error message'
+    message = "Error message"
     error = MarshPyError(node, message)
 
-    location_string = '{}:{}:{}'.format('file_name', 10, 42)
+    location_string = "file_name:10:42"
 
     error_string = str(error)
     assert location_string in error_string

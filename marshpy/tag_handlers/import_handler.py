@@ -1,13 +1,11 @@
 """Tag handler used to import files in YAML documents."""
 from gettext import gettext as _
 from pathlib import Path
-from typing import Any
-from typing import Optional
+from typing import Any, Optional
 
 from marshpy.core.constants import UNDEFINED
 from marshpy.core.errors import ErrorCode
-from marshpy.core.interfaces import IBaseField
-from marshpy.core.interfaces import ILoadingContext
+from marshpy.core.interfaces import IBaseField, ILoadingContext
 from marshpy.tag_handlers.path_handler import PathHandler
 
 
@@ -17,23 +15,23 @@ class ImportHandler(PathHandler):
     Will replace the tagged node by the loaded document.
     """
 
-    tag_pattern = '^(try-import|import)$'
+    tag_pattern = "^(try-import|import)$"
 
     def load(self, context: ILoadingContext, field: IBaseField) -> Any:
         """See Resolver.resolve for usage."""
         if not context.expect_scalar(
-            _('import / try-import must be set on a scalar node')
+            _("import / try-import must be set on a scalar node")
         ):
             return UNDEFINED
 
         file_path = self._get_file(context)
         if file_path is None:
             node = context.current_node()
-            if node.tag == '!import':
+            if node.tag == "!import":
                 context.error(
                     ErrorCode.IMPORT_NOT_FOUND,
-                    _('Unable to find {} in any of the configured directories'),
-                    node.value
+                    _("Unable to find {} in any of the configured directories"),
+                    node.value,
                 )
 
             return UNDEFINED

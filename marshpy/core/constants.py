@@ -1,6 +1,5 @@
 """MarshPy common definitions."""
-from typing import TypeVar
-from typing import Union
+from typing import TypeVar, Union
 
 
 class Undefined:
@@ -11,5 +10,5 @@ class Undefined:
 # loading a field.
 UNDEFINED = Undefined()
 
-ObjectType = TypeVar('ObjectType')
+ObjectType = TypeVar("ObjectType")
 LoadResult = Union[ObjectType, Undefined]

@@ -1,33 +1,28 @@
 """Custom resolvers"""
-from typing import Any, Type, get_type_hints, get_args, get_origin
+from typing import Any, Type, get_args, get_origin, get_type_hints
 
 from marshpy.fields.base_field import IBaseField
-from marshpy.fields.object_field import ObjectField
 from marshpy.fields.bool_field import BoolField
 from marshpy.fields.dict_field import DictField
 from marshpy.fields.float_field import FloatField
 from marshpy.fields.int_field import IntField
 from marshpy.fields.list_field import ListField
+from marshpy.fields.object_field import ObjectField
 from marshpy.fields.string_field import StringField
-
 
 _LITERAL_FIELD_MAPPINGS = {
     str: StringField,
     int: IntField,
     bool: BoolField,
-    float: FloatField
+    float: FloatField,
 }
 
+
 def annotation_fields_resolver(obj: Any) -> dict[str, IBaseField]:
+    """Fields resolver using type hints to get object field."""
     result = {}
-    annotations = obj.__annotations__
-    for member in dir(obj):
-        if member not in annotations:
-            continue
-
-        member_annotation = annotations[member]
-
-        result[member] = _build_field(member_annotation)
+    for name, annotation in get_type_hints(obj).items():
+        result[name] = _build_field(annotation)
 
     return result
 

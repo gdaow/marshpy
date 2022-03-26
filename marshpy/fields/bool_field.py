@@ -7,17 +7,20 @@ from marshpy.core.errors import ErrorCode
 from marshpy.core.interfaces import ILoadingContext
 from marshpy.fields.scalar_field import ScalarField
 
-
-_TRUE_VALUES = [
-    'y', 'Y', 'yes', 'Yes', 'YES',
-    'true', 'True', 'TRUE',
-    'on', 'On', 'ON'
-]
+_TRUE_VALUES = ["y", "Y", "yes", "Yes", "YES", "true", "True", "TRUE", "on", "On", "ON"]
 
 _FALSE_VALUES = [
-    'n', 'N', 'no', 'No', 'NO',
-    'false', 'False', 'FALSE'
-    'off', 'Off', 'OFF'
+    "n",
+    "N",
+    "no",
+    "No",
+    "NO",
+    "false",
+    "False",
+    "FALSE",
+    "off",
+    "Off",
+    "OFF",
 ]
 
 
@@ -33,8 +36,8 @@ class BoolField(ScalarField):
 
         context.error(
             ErrorCode.VALUE_ERROR,
-            _('Boolean value should be one of {}'),
-            ', '.join(_TRUE_VALUES + _FALSE_VALUES)
+            _("Boolean value should be one of {}"),
+            ", ".join(_TRUE_VALUES + _FALSE_VALUES),
         )
 
         return UNDEFINED
