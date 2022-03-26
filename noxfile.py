@@ -97,3 +97,13 @@ def dev(session: Session) -> None:
         external=True,
         silent=True
     )
+
+
+@nox.session(python="3.10")
+def publish(session: Session) -> None:
+    """
+    Publish a package to pypi
+    """
+
+    session.install("poetry", "poetry-dynamic-versioning")
+    session.run("poetry", "publish", "--build")

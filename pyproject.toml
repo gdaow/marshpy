@@ -32,7 +32,7 @@ python = '^3.9'
 PyYAML = "^6.0"
 
 [tool.poetry-dynamic-versioning]
-enable = false
+enable = true
 
 [tool.pytest.ini_options]
 junit_family = "legacy"
